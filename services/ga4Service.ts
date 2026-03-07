@@ -1329,14 +1329,9 @@ let client: BetaAnalyticsDataClient | null = null
 function getClient() {
 
   if (!client) {
-
     client = new BetaAnalyticsDataClient({
-      credentials: {
-        client_email: process.env.GA4_CLIENT_EMAIL,
-        private_key: process.env.GA4_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-      },
+      keyFilename: process.env.GA_KEY_FILE,
     })
-
   }
 
   return client

@@ -1115,7 +1115,7 @@ const models =
 
 if (!models.length) {
 
-  console.log("Traffic erosion skipped: no focus model selected")
+  // console.log("Traffic erosion skipped: no focus model selected")
 
   return NextResponse.json({
     success: true,
@@ -1203,7 +1203,7 @@ erosion.sort((a, b) => b.erosion - a.erosion)
 
 const result = erosion.slice(0, 120)
 
-console.log("EROSION PAIRS:", result.slice(0, 10))
+// console.log("EROSION PAIRS:", result.slice(0, 10))
 
 return NextResponse.json({
   success: true,

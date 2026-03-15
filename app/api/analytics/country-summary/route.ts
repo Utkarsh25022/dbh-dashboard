@@ -21,15 +21,77 @@ export async function GET(req: NextRequest) {
     /* BUILD MODEL REGEX */
     /* ----------------------------- */
 
-    const modelRegex = models
-      .split(",")
-      .map(m =>
-        `.*${m
-          .toLowerCase()
-          .trim()
-          .replace(/\s+/g, "[-/]*")}.*`
-      )
-      .join("|")
+    /* ----------------------------- */
+/* FOCUS MODEL ONLY */
+/* ----------------------------- */
+
+  const focusModel =
+  models.split(",")[0]
+    ?.toLowerCase()
+    .trim() || ""
+
+  const modelRegex =
+  focusModel.replace(/\s+/g, ".*")
+
+    /* ----------------------------- */
+    /* BUILD FILTERS (SOP LOGIC) */
+    /* ----------------------------- */
+
+    const filters: any[] = []
+
+    /* HOSTNAME FILTER */
+
+    filters.push({
+      filter: {
+        fieldName: "hostName",
+        stringFilter: {
+          matchType: "PARTIAL_REGEXP",
+          value: "www.cardekho|hindi.cardekho|tamil.cardekho|telugu.cardekho|kannada.cardekho|malayalam.cardekho|ai.cardekho"
+        }
+      }
+    })
+
+    /* MODEL FILTER (GA DIMENSION) */
+
+    if (modelRegex) {
+      filters.push({
+        filter: {
+          fieldName: "customEvent:modelName",
+          stringFilter: {
+            matchType: "FULL_REGEXP",
+            value: modelRegex
+          }
+        }
+      })
+    }
+
+    /* REMOVE USED PAGES */
+
+    filters.push({
+      notExpression: {
+        filter: {
+          fieldName: "pagePathPlusQueryString",
+          stringFilter: {
+            matchType: "CONTAINS",
+            value: "used"
+          }
+        }
+      }
+    })
+
+    /* REMOVE VIRTUAL PAGES */
+
+    filters.push({
+      notExpression: {
+        filter: {
+          fieldName: "pagePathPlusQueryString",
+          stringFilter: {
+            matchType: "CONTAINS",
+            value: "virtual"
+          }
+        }
+      }
+    })
 
     /* ----------------------------- */
     /* GA4 REPORT */
@@ -44,33 +106,30 @@ export async function GET(req: NextRequest) {
       ],
 
       dimensions: [
-        { name: "region" }
+        { name: "region" },
+        { name: "city" }
       ],
 
       metrics: [
         { name: "totalUsers" }
       ],
 
-      dimensionFilter: modelRegex
-        ? {
-            filter: {
-              fieldName: "pagePath",
-              stringFilter: {
-                matchType: "FULL_REGEXP",
-                value: modelRegex
-              }
-            }
-          }
-        : undefined,
+      dimensionFilter: {
+        andGroup: {
+          expressions: filters
+        }
+      },
 
       orderBys: [
         {
-          metric: { metricName: "totalUsers" },
+          metric: {
+            metricName: "totalUsers"
+          },
           desc: true
         }
       ],
 
-      limit: 10
+      limit: 10000
 
     })
 
@@ -90,11 +149,15 @@ export async function GET(req: NextRequest) {
       const state =
         row.dimensionValues?.[0]?.value || "Unknown"
 
+      const city =
+        row.dimensionValues?.[1]?.value || "Unknown"
+
       const visits =
         Number(row.metricValues?.[0]?.value || 0)
 
       return {
         state,
+        city,
         visits
       }
 

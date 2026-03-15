@@ -437,7 +437,186 @@
 
 
 
+// 'use client'
+
+// import {
+//   Card,
+//   CardContent,
+//   CardHeader,
+//   CardTitle,
+//   CardDescription,
+// } from '@/components/ui/card'
+
+// import { ResponsiveHeatMap } from '@nivo/heatmap'
+
+// type ErosionItem = {
+//   from: string
+//   to: string
+//   erosion: number
+// }
+
+// interface Props {
+//   data?: ErosionItem[]
+//   isLoading?: boolean
+// }
+
+// export function TrafficErosionMatrix({ data = [], isLoading }: Props) {
+
+//   const safeData = Array.isArray(data) ? data : []
+
+//   if (isLoading) {
+//     return (
+//       <Card>
+//         <CardHeader>
+//           <CardTitle>Traffic Erosion Matrix</CardTitle>
+//         </CardHeader>
+//         <CardContent className="h-[400px] flex items-center justify-center text-gray-500">
+//           Loading erosion data...
+//         </CardContent>
+//       </Card>
+//     )
+//   }
+
+//   if (!safeData.length) {
+//     return (
+//       <Card>
+//         <CardHeader>
+//           <CardTitle>Traffic Erosion Matrix</CardTitle>
+//           <CardDescription>
+//             Which models steal traffic from others
+//           </CardDescription>
+//         </CardHeader>
+
+//         <CardContent className="h-[400px] flex items-center justify-center text-gray-500">
+//           No erosion data available
+//         </CardContent>
+//       </Card>
+//     )
+//   }
+
+//   /* ----------------------------- */
+//   /* BUILD MODEL LIST */
+//   /* ----------------------------- */
+
+//   const models = Array.from(
+//     new Set([
+//       ...safeData.map((d) => d.from),
+//       ...safeData.map((d) => d.to),
+//     ])
+//   )
+
+//   /* ----------------------------- */
+//   /* BUILD HEATMAP DATA             */
+//   /* Nivo expects:                  */
+//   /* { id: string,                  */
+//   /*   data: { x: string,           */
+//   /*           y: number }[] }[]    */
+//   /* ----------------------------- */
+
+//   const heatmapData = models
+//     .map((model) => {
+
+//       const rowData = models.map((target) => {
+//         const match = safeData.find(
+//           (d) => d.from === model && d.to === target
+//         )
+//         return {
+//           x: target,
+//           y: match ? match.erosion : 0,
+//         }
+//       })
+
+//       const hasValue = rowData.some((cell) => cell.y > 0)
+
+//       /* remove empty rows */
+//       return hasValue ? { id: model, data: rowData } : null
+
+//     })
+//     .filter(Boolean) as { id: string; data: { x: string; y: number }[] }[]
+
+//   return (
+//     <Card>
+
+//       <CardHeader>
+//         <CardTitle>Traffic Erosion Matrix</CardTitle>
+//         <CardDescription>
+//           Which models steal traffic from others
+//         </CardDescription>
+//       </CardHeader>
+
+//       <CardContent style={{ height: 450 }}>
+
+//         <ResponsiveHeatMap
+//           data={heatmapData}
+
+//           margin={{ top: 80, right: 60, bottom: 60, left: 120 }}
+
+//           valueFormat=">-.0f"
+
+//           colors={{
+//             type: 'sequential',
+//             scheme: 'oranges',
+//           }}
+
+//           emptyColor="#f5f5f5"
+
+//           axisTop={{
+//             tickRotation: -45,
+//             tickSize: 5,
+//             tickPadding: 5,
+//           }}
+
+//           axisLeft={{
+//             tickSize: 5,
+//             tickPadding: 5,
+//           }}
+
+//           cellBorderWidth={1}
+//           cellBorderColor="#ffffff"
+
+//           hoverTarget="cell"
+//           inactiveOpacity={1}
+//           activeOpacity={1}
+
+//           tooltip={({ cell }) => (
+//             <div className="bg-white shadow-md p-2 rounded text-xs">
+//               <strong>{cell.serieId}</strong> → <strong>{cell.data.x}</strong>
+//               <br />
+//               Traffic shift: {Number(cell.value).toLocaleString()}
+//             </div>
+//           )}
+
+//           animate={true}
+//         />
+
+//       </CardContent>
+
+//     </Card>
+//   )
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 'use client'
+
+import { useEffect } from 'react'
 
 import {
   Card,
@@ -448,6 +627,8 @@ import {
 } from '@/components/ui/card'
 
 import { ResponsiveHeatMap } from '@nivo/heatmap'
+
+import { registerChart } from '@/lib/ppt/chartRegistry'
 
 type ErosionItem = {
   from: string
@@ -463,6 +644,25 @@ interface Props {
 export function TrafficErosionMatrix({ data = [], isLoading }: Props) {
 
   const safeData = Array.isArray(data) ? data : []
+
+  /* ----------------------------- */
+  /* PPT EXPORT REGISTRATION */
+  /* ----------------------------- */
+
+  useEffect(() => {
+
+    if (!safeData.length) return
+
+    const labels = safeData.map(d => `${d.from} → ${d.to}`)
+    const values = safeData.map(d => Number(d.erosion))
+
+    registerChart({
+      title: "Traffic Erosion Matrix",
+      labels,
+      values
+    })
+
+  }, [safeData])
 
   if (isLoading) {
     return (
@@ -506,11 +706,7 @@ export function TrafficErosionMatrix({ data = [], isLoading }: Props) {
   )
 
   /* ----------------------------- */
-  /* BUILD HEATMAP DATA             */
-  /* Nivo expects:                  */
-  /* { id: string,                  */
-  /*   data: { x: string,           */
-  /*           y: number }[] }[]    */
+  /* BUILD HEATMAP DATA */
   /* ----------------------------- */
 
   const heatmapData = models
@@ -528,7 +724,6 @@ export function TrafficErosionMatrix({ data = [], isLoading }: Props) {
 
       const hasValue = rowData.some((cell) => cell.y > 0)
 
-      /* remove empty rows */
       return hasValue ? { id: model, data: rowData } : null
 
     })

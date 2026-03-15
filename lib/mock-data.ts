@@ -59,13 +59,13 @@ export const trafficShareData: TrafficShareItem[] = [
 ]
 
 export const competitorData: CompetitorRow[] = [
-  { model: 'Tata Nexon',      trafficErosionRank: 1, reverseTrafficErosionRank: 5, performance: 'high'   },
-  { model: 'Hyundai Creta',   trafficErosionRank: 2, reverseTrafficErosionRank: 3, performance: 'high'   },
-  { model: 'Maruti Brezza',   trafficErosionRank: 3, reverseTrafficErosionRank: 4, performance: 'medium' },
-  { model: 'Kia Seltos',      trafficErosionRank: 4, reverseTrafficErosionRank: 2, performance: 'medium' },
-  { model: 'Mahindra XUV700', trafficErosionRank: 5, reverseTrafficErosionRank: 1, performance: 'high'   },
-  { model: 'Tata Punch',      trafficErosionRank: 6, reverseTrafficErosionRank: 6, performance: 'low'    },
-  { model: 'Kia Sonet',       trafficErosionRank: 7, reverseTrafficErosionRank: 7, performance: 'medium' },
+  { model: 'Tata Nexon',      trafficErosionRank: 1, reverseErosionRank: 5, performance: 'high'   },
+  { model: 'Hyundai Creta',   trafficErosionRank: 2, reverseErosionRank: 3, performance: 'high'   },
+  { model: 'Maruti Brezza',   trafficErosionRank: 3, reverseErosionRank: 4, performance: 'medium' },
+  { model: 'Kia Seltos',      trafficErosionRank: 4, reverseErosionRank: 2, performance: 'medium' },
+  { model: 'Mahindra XUV700', trafficErosionRank: 5, reverseErosionRank: 1, performance: 'high'   },
+  { model: 'Tata Punch',      trafficErosionRank: 6, reverseErosionRank: 6, performance: 'low'    },
+  { model: 'Kia Sonet',       trafficErosionRank: 7, reverseErosionRank: 7, performance: 'medium' },
 ]
 
 export const deviceData: DeviceData[] = [

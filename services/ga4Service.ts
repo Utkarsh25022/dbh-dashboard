@@ -1,1324 +1,24 @@
-// // // // // // import { BetaAnalyticsDataClient } from "@google-analytics/data";
-// // // // // // import { buildGA4Query } from "./ga4QueryBuilder";
-
-// // // // // // const client = new BetaAnalyticsDataClient({
-// // // // // // keyFilename: process.env.GA_KEY_FILE,
-// // // // // // });
-
-// // // // // // /* ----------------------------- */
-// // // // // // /* DATE CLAMP (max 30 days) */
-// // // // // // /* ----------------------------- */
-
-// // // // // // function clampDateRange(startDate: string, endDate: string) {
-
-// // // // // // if (
-// // // // // // startDate?.includes("daysAgo") ||
-// // // // // // endDate === "today"
-// // // // // // ) {
-// // // // // // return { startDate, endDate };
-// // // // // // }
-
-// // // // // // const end = new Date(endDate);
-// // // // // // const start = new Date(startDate);
-
-// // // // // // if (isNaN(end.getTime()) || isNaN(start.getTime())) {
-// // // // // // return {
-// // // // // // startDate: "7daysAgo",
-// // // // // // endDate: "today",
-// // // // // // };
-// // // // // // }
-
-// // // // // // const diffDays =
-// // // // // // (end.getTime() - start.getTime()) /
-// // // // // // (1000 * 60 * 60 * 24);
-
-// // // // // // if (diffDays > 30) {
-// // // // // // start.setDate(end.getDate() - 30);
-// // // // // // }
-
-// // // // // // return {
-// // // // // // startDate: start.toISOString().split("T")[0],
-// // // // // // endDate: end.toISOString().split("T")[0],
-// // // // // // };
-// // // // // // }
-
-// // // // // // /* ----------------------------- */
-// // // // // // /* SAFE GA4 EXECUTION */
-// // // // // // /* ----------------------------- */
-
-// // // // // // async function runGA4Report(request: any) {
-
-// // // // // // const timeout = new Promise((_, reject) =>
-// // // // // // setTimeout(() => reject(new Error("GA4 timeout")), 20000)
-// // // // // // );
-
-// // // // // // const report = client.runReport(request);
-
-// // // // // // return Promise.race([report, timeout]);
-// // // // // // }
-
-// // // // // // /* ----------------------------- */
-// // // // // // /* UNIVERSAL GA FETCH */
-// // // // // // /* ----------------------------- */
-
-// // // // // // export async function fetchTOFU(
-// // // // // // propertyId: string,
-// // // // // // startDate: string,
-// // // // // // endDate: string,
-// // // // // // models: string[] | string,
-// // // // // // report: "TOFU" | "MOFU" | "TREND" = "TOFU"
-// // // // // // ) {
-
-// // // // // // try {
-
-
-// // // // // // const range = clampDateRange(startDate, endDate);
-
-// // // // // // const requestBody = buildGA4Query({
-// // // // // //   report,
-// // // // // //   startDate: range.startDate,
-// // // // // //   endDate: range.endDate,
-// // // // // //   models,
-// // // // // // });
-
-// // // // // // const [response]: any = await runGA4Report({
-// // // // // //   property: `properties/${propertyId}`,
-// // // // // //   ...requestBody,
-// // // // // // });
-
-// // // // // // if (!response?.rows) return [];
-
-// // // // // // return response.rows;
-
-
-// // // // // // } catch (error) {
-
-
-// // // // // // console.error(`GA4 ${report} Fetch Error:`, error);
-// // // // // // return [];
-
-
-// // // // // // }
-// // // // // // }
-
-// // // // // // /* ----------------------------- */
-// // // // // // /* AUDIENCE ENGAGEMENT REPORT */
-// // // // // // /* PV/UU + Avg Session Duration */
-// // // // // // /* ----------------------------- */
-
-// // // // // // export async function fetchEngagement(
-// // // // // // propertyId: string,
-// // // // // // startDate: string,
-// // // // // // endDate: string
-// // // // // // ) {
-
-// // // // // // try {
-
-
-// // // // // // const range = clampDateRange(startDate, endDate);
-
-// // // // // // const [response]: any = await runGA4Report({
-// // // // // //   property: `properties/${propertyId}`,
-
-// // // // // //   dateRanges: [
-// // // // // //     {
-// // // // // //       startDate: range.startDate,
-// // // // // //       endDate: range.endDate,
-// // // // // //     },
-// // // // // //   ],
-
-// // // // // //   dimensions: [
-// // // // // //     { name: "date" },
-// // // // // //   ],
-
-// // // // // //   metrics: [
-// // // // // //     { name: "screenPageViews" },
-// // // // // //     { name: "totalUsers" },
-// // // // // //     { name: "averageSessionDuration" },
-// // // // // //   ],
-// // // // // // });
-
-// // // // // // if (!response?.rows) return [];
-
-// // // // // // return response.rows.map((row: any) => {
-
-// // // // // //   const date = row.dimensionValues?.[0]?.value;
-
-// // // // // //   const pv = Number(row.metricValues?.[0]?.value || 0);
-// // // // // //   const users = Number(row.metricValues?.[1]?.value || 0);
-// // // // // //   const duration = Number(row.metricValues?.[2]?.value || 0);
-
-// // // // // //   return {
-// // // // // //     date,
-// // // // // //     pv_uu: users ? pv / users : 0,
-// // // // // //     avg_session_duration: duration / 60,
-// // // // // //   };
-
-// // // // // // });
-
-// // // // // // } catch (error) {
-
-
-// // // // // // console.error("GA4 Engagement Fetch Error:", error);
-// // // // // // return [];
-
-// // // // // // }
-// // // // // // }
-
-// // // // // // /* ----------------------------- */
-// // // // // // /* TRAFFIC EROSION FETCH */
-// // // // // // /* Used by erosion matrix */
-// // // // // // /* ----------------------------- */
-
-// // // // // // export async function fetchTrafficErosion(
-// // // // // // propertyId: string,
-// // // // // // startDate: string,
-// // // // // // endDate: string
-// // // // // // ) {
-
-// // // // // // try {
-
-
-// // // // // // const range = clampDateRange(startDate, endDate);
-
-// // // // // // const [response]: any = await runGA4Report({
-// // // // // //   property: `properties/${propertyId}`,
-
-// // // // // //   dateRanges: [
-// // // // // //     {
-// // // // // //       startDate: range.startDate,
-// // // // // //       endDate: range.endDate,
-// // // // // //     },
-// // // // // //   ],
-
-// // // // // //   dimensions: [
-// // // // // //     { name: "pagePath" },
-// // // // // //     { name: "pageReferrer" },
-// // // // // //   ],
-
-// // // // // //   metrics: [
-// // // // // //     { name: "totalUsers" },
-// // // // // //   ],
-// // // // // // });
-
-// // // // // // if (!response?.rows) return [];
-
-// // // // // // return response.rows.map((row: any) => ({
-
-// // // // // //   from: row.dimensionValues?.[1]?.value || "",
-// // // // // //   to: row.dimensionValues?.[0]?.value || "",
-// // // // // //   erosion: Number(row.metricValues?.[0]?.value || 0),
-
-// // // // // // }));
-
-// // // // // // } catch (error) {
-
-// // // // // // console.error("GA4 Traffic Erosion Fetch Error:", error);
-// // // // // // return [];
-
-
-// // // // // // }
-// // // // // // }
-
-
-
-
-
-
-
-
-
-
-
-
-
-// // // // // // import { BetaAnalyticsDataClient } from "@google-analytics/data";
-// // // // // // import { buildGA4Query } from "./ga4QueryBuilder";
-
-// // // // // // /* ----------------------------- */
-// // // // // // /* SINGLETON CLIENT (FASTER) */
-// // // // // // /* ----------------------------- */
-
-// // // // // // let client: BetaAnalyticsDataClient | null = null;
-
-// // // // // // function getClient() {
-// // // // // //   if (!client) {
-// // // // // //     client = new BetaAnalyticsDataClient({
-// // // // // //       keyFilename: process.env.GA_KEY_FILE,
-// // // // // //     });
-// // // // // //   }
-// // // // // //   return client;
-// // // // // // }
-
-// // // // // // /* ----------------------------- */
-// // // // // // /* DATE CLAMP (max 30 days) */
-// // // // // // /* ----------------------------- */
-
-// // // // // // function clampDateRange(startDate: string, endDate: string) {
-
-// // // // // //   if (
-// // // // // //     startDate?.includes("daysAgo") ||
-// // // // // //     endDate === "today"
-// // // // // //   ) {
-// // // // // //     return { startDate, endDate };
-// // // // // //   }
-
-// // // // // //   const end = new Date(endDate);
-// // // // // //   const start = new Date(startDate);
-
-// // // // // //   if (isNaN(end.getTime()) || isNaN(start.getTime())) {
-// // // // // //     return {
-// // // // // //       startDate: "7daysAgo",
-// // // // // //       endDate: "today",
-// // // // // //     };
-// // // // // //   }
-
-// // // // // //   const diffDays =
-// // // // // //     (end.getTime() - start.getTime()) /
-// // // // // //     (1000 * 60 * 60 * 24);
-
-// // // // // //   if (diffDays > 30) {
-// // // // // //     start.setDate(end.getDate() - 30);
-// // // // // //   }
-
-// // // // // //   return {
-// // // // // //     startDate: start.toISOString().split("T")[0],
-// // // // // //     endDate: end.toISOString().split("T")[0],
-// // // // // //   };
-// // // // // // }
-
-// // // // // // /* ----------------------------- */
-// // // // // // /* SAFE GA4 EXECUTION */
-// // // // // // /* ----------------------------- */
-
-// // // // // // async function runGA4Report(request: any) {
-
-// // // // // //   const client = getClient();
-
-// // // // // //   const timeout = new Promise((_, reject) =>
-// // // // // //     setTimeout(() => reject(new Error("GA4 timeout")), 30000)
-// // // // // //   );
-
-// // // // // //   const report = client.runReport(request);
-
-// // // // // //   return Promise.race([report, timeout]);
-// // // // // // }
-
-// // // // // // /* ----------------------------- */
-// // // // // // /* UNIVERSAL GA FETCH */
-// // // // // // /* ----------------------------- */
-
-// // // // // // export async function fetchTOFU(
-// // // // // //   propertyId: string,
-// // // // // //   startDate: string,
-// // // // // //   endDate: string,
-// // // // // //   models: string[] | string,
-// // // // // //   report: "TOFU" | "MOFU" | "TREND" = "TOFU"
-// // // // // // ) {
-
-// // // // // //   try {
-
-// // // // // //     const range = clampDateRange(startDate, endDate);
-
-// // // // // //     const requestBody = buildGA4Query({
-// // // // // //       report,
-// // // // // //       startDate: range.startDate,
-// // // // // //       endDate: range.endDate,
-// // // // // //       models,
-// // // // // //     });
-
-// // // // // //     const [response]: any = await runGA4Report({
-// // // // // //       property: `properties/${propertyId}`,
-// // // // // //       ...requestBody,
-// // // // // //     });
-
-// // // // // //     if (!response?.rows) return [];
-
-// // // // // //     return response.rows;
-
-// // // // // //   } catch (error) {
-
-// // // // // //     console.error(`GA4 ${report} Fetch Error:`, error);
-
-// // // // // //     /* -------- RETRY ONCE -------- */
-
-// // // // // //     try {
-
-// // // // // //       console.log(`Retrying GA4 ${report} query...`);
-
-// // // // // //       const range = clampDateRange(startDate, endDate);
-
-// // // // // //       const requestBody = buildGA4Query({
-// // // // // //         report,
-// // // // // //         startDate: range.startDate,
-// // // // // //         endDate: range.endDate,
-// // // // // //         models,
-// // // // // //       });
-
-// // // // // //       const [retryResponse]: any = await runGA4Report({
-// // // // // //         property: `properties/${propertyId}`,
-// // // // // //         ...requestBody,
-// // // // // //       });
-
-// // // // // //       if (!retryResponse?.rows) return [];
-
-// // // // // //       return retryResponse.rows;
-
-// // // // // //     } catch (retryError) {
-
-// // // // // //       console.error(`GA4 ${report} Retry Failed:`, retryError);
-// // // // // //       return [];
-
-// // // // // //     }
-
-// // // // // //   }
-// // // // // // }
-
-// // // // // // /* ----------------------------- */
-// // // // // // /* AUDIENCE ENGAGEMENT REPORT */
-// // // // // // /* PV/UU + Avg Session Duration */
-// // // // // // /* ----------------------------- */
-
-// // // // // // export async function fetchEngagement(
-// // // // // //   propertyId: string,
-// // // // // //   startDate: string,
-// // // // // //   endDate: string
-// // // // // // ) {
-
-// // // // // //   try {
-
-// // // // // //     const range = clampDateRange(startDate, endDate);
-
-// // // // // //     const client = getClient();
-
-// // // // // //     const [response]: any = await runGA4Report({
-// // // // // //       property: `properties/${propertyId}`,
-
-// // // // // //       dateRanges: [
-// // // // // //         {
-// // // // // //           startDate: range.startDate,
-// // // // // //           endDate: range.endDate,
-// // // // // //         },
-// // // // // //       ],
-
-// // // // // //       dimensions: [
-// // // // // //         { name: "date" },
-// // // // // //       ],
-
-// // // // // //       metrics: [
-// // // // // //         { name: "screenPageViews" },
-// // // // // //         { name: "totalUsers" },
-// // // // // //         { name: "averageSessionDuration" },
-// // // // // //       ],
-// // // // // //     });
-
-// // // // // //     if (!response?.rows) return [];
-
-// // // // // //     return response.rows.map((row: any) => {
-
-// // // // // //       const date = row.dimensionValues?.[0]?.value;
-
-// // // // // //       const pv = Number(row.metricValues?.[0]?.value || 0);
-// // // // // //       const users = Number(row.metricValues?.[1]?.value || 0);
-// // // // // //       const duration = Number(row.metricValues?.[2]?.value || 0);
-
-// // // // // //       return {
-// // // // // //         date,
-// // // // // //         pv_uu: users ? pv / users : 0,
-// // // // // //         avg_session_duration: duration / 60,
-// // // // // //       };
-
-// // // // // //     });
-
-// // // // // //   } catch (error) {
-
-// // // // // //     console.error("GA4 Engagement Fetch Error:", error);
-// // // // // //     return [];
-
-// // // // // //   }
-// // // // // // }
-
-// // // // // // /* ----------------------------- */
-// // // // // // /* TRAFFIC EROSION FETCH */
-// // // // // // /* Used by erosion matrix */
-// // // // // // /* ----------------------------- */
-
-// // // // // // export async function fetchTrafficErosion(
-// // // // // //   propertyId: string,
-// // // // // //   startDate: string,
-// // // // // //   endDate: string
-// // // // // // ) {
-
-// // // // // //   try {
-
-// // // // // //     const range = clampDateRange(startDate, endDate);
-
-// // // // // //     const [response]: any = await runGA4Report({
-// // // // // //       property: `properties/${propertyId}`,
-
-// // // // // //       dateRanges: [
-// // // // // //         {
-// // // // // //           startDate: range.startDate,
-// // // // // //           endDate: range.endDate,
-// // // // // //         },
-// // // // // //       ],
-
-// // // // // //       dimensions: [
-// // // // // //         { name: "pagePath" },
-// // // // // //         { name: "pageReferrer" },
-// // // // // //       ],
-
-// // // // // //       metrics: [
-// // // // // //         { name: "totalUsers" },
-// // // // // //       ],
-// // // // // //     });
-
-// // // // // //     if (!response?.rows) return [];
-
-// // // // // //     return response.rows.map((row: any) => ({
-
-// // // // // //       from: row.dimensionValues?.[1]?.value || "",
-// // // // // //       to: row.dimensionValues?.[0]?.value || "",
-// // // // // //       erosion: Number(row.metricValues?.[0]?.value || 0),
-
-// // // // // //     }));
-
-// // // // // //   } catch (error) {
-
-// // // // // //     console.error("GA4 Traffic Erosion Fetch Error:", error);
-// // // // // //     return [];
-
-// // // // // //   }
-// // // // // // }
-
-
-
-
-
-// // // // // import { BetaAnalyticsDataClient } from "@google-analytics/data"
-// // // // // import { buildGA4Query } from "./ga4QueryBuilder"
-
-// // // // // /* ----------------------------- */
-// // // // // /* SINGLETON CLIENT */
-// // // // // /* ----------------------------- */
-
-// // // // // let client: BetaAnalyticsDataClient | null = null
-
-// // // // // function getClient() {
-// // // // //   if (!client) {
-// // // // //     client = new BetaAnalyticsDataClient({
-// // // // //       keyFilename: process.env.GA_KEY_FILE,
-// // // // //     })
-// // // // //   }
-// // // // //   return client
-// // // // // }
-
-// // // // // /* ----------------------------- */
-// // // // // /* DATE CLAMP */
-// // // // // /* ----------------------------- */
-
-// // // // // function clampDateRange(startDate: string, endDate: string) {
-
-// // // // //   if (
-// // // // //     startDate?.includes("daysAgo") ||
-// // // // //     endDate === "today"
-// // // // //   ) {
-// // // // //     return { startDate, endDate }
-// // // // //   }
-
-// // // // //   const end = new Date(endDate)
-// // // // //   const start = new Date(startDate)
-
-// // // // //   if (isNaN(end.getTime()) || isNaN(start.getTime())) {
-// // // // //     return {
-// // // // //       startDate: "7daysAgo",
-// // // // //       endDate: "today",
-// // // // //     }
-// // // // //   }
-
-// // // // //   const diffDays =
-// // // // //     (end.getTime() - start.getTime()) /
-// // // // //     (1000 * 60 * 60 * 24)
-
-// // // // //   if (diffDays > 30) {
-// // // // //     start.setDate(end.getDate() - 30)
-// // // // //   }
-
-// // // // //   return {
-// // // // //     startDate: start.toISOString().split("T")[0],
-// // // // //     endDate: end.toISOString().split("T")[0],
-// // // // //   }
-// // // // // }
-
-// // // // // /* ----------------------------- */
-// // // // // /* SAFE GA EXECUTION */
-// // // // // /* ----------------------------- */
-
-// // // // // async function runGA4Report(request: any) {
-
-// // // // //   const client = getClient()
-
-// // // // //   const timeout = new Promise((_, reject) =>
-// // // // //     setTimeout(() => reject(new Error("GA4 timeout")), 30000)
-// // // // //   )
-
-// // // // //   const report = client.runReport(request)
-
-// // // // //   return Promise.race([report, timeout])
-// // // // // }
-
-// // // // // /* ----------------------------- */
-// // // // // /* UNIVERSAL GA FETCH */
-// // // // // /* ----------------------------- */
-
-// // // // // export async function fetchTOFU(
-// // // // //   propertyId: string,
-// // // // //   startDate: string,
-// // // // //   endDate: string,
-// // // // //   models: string[] | string,
-// // // // //   report: "TOFU" | "MOFU" | "TREND" = "TOFU"
-// // // // // ) {
-
-// // // // //   try {
-
-// // // // //     const range = clampDateRange(startDate, endDate)
-
-// // // // //     const requestBody = buildGA4Query({
-// // // // //       report,
-// // // // //       startDate: range.startDate,
-// // // // //       endDate: range.endDate,
-// // // // //       models,
-// // // // //     })
-
-// // // // //     const [response]: any = await runGA4Report({
-// // // // //       property: `properties/${propertyId}`,
-// // // // //       ...requestBody,
-// // // // //     })
-
-// // // // //     if (!response?.rows) return []
-
-// // // // //     return response.rows
-
-// // // // //   } catch (error) {
-
-// // // // //     console.error(`GA4 ${report} Fetch Error:`, error)
-// // // // //     return []
-
-// // // // //   }
-
-// // // // // }
-
-// // // // // /* ----------------------------- */
-// // // // // /* MOFU FETCH */
-// // // // // /* ----------------------------- */
-
-// // // // // export async function fetchMOFU(
-// // // // //   propertyId: string,
-// // // // //   startDate: string,
-// // // // //   endDate: string,
-// // // // //   models: string[] | string
-// // // // // ) {
-
-// // // // //   return fetchTOFU(
-// // // // //     propertyId,
-// // // // //     startDate,
-// // // // //     endDate,
-// // // // //     models,
-// // // // //     "MOFU"
-// // // // //   )
-
-// // // // // }
-
-
-
-
-
-// // // // import { BetaAnalyticsDataClient } from "@google-analytics/data"
-// // // // import { buildGA4Query } from "./ga4QueryBuilder"
-
-// // // // /* ----------------------------- */
-// // // // /* SINGLETON CLIENT */
-// // // // /* ----------------------------- */
-
-// // // // let client: BetaAnalyticsDataClient | null = null
-
-// // // // function getClient() {
-// // // //   if (!client) {
-// // // //     client = new BetaAnalyticsDataClient({
-// // // //       keyFilename: process.env.GA_KEY_FILE,
-// // // //     })
-// // // //   }
-// // // //   return client
-// // // // }
-
-// // // // /* ----------------------------- */
-// // // // /* DATE CLAMP */
-// // // // /* ----------------------------- */
-
-// // // // function clampDateRange(startDate: string, endDate: string) {
-
-// // // //   if (
-// // // //     startDate?.includes("daysAgo") ||
-// // // //     endDate === "today"
-// // // //   ) {
-// // // //     return { startDate, endDate }
-// // // //   }
-
-// // // //   const end = new Date(endDate)
-// // // //   const start = new Date(startDate)
-
-// // // //   if (isNaN(end.getTime()) || isNaN(start.getTime())) {
-// // // //     return {
-// // // //       startDate: "7daysAgo",
-// // // //       endDate: "today",
-// // // //     }
-// // // //   }
-
-// // // //   const diffDays =
-// // // //     (end.getTime() - start.getTime()) /
-// // // //     (1000 * 60 * 60 * 24)
-
-// // // //   if (diffDays > 30) {
-// // // //     start.setDate(end.getDate() - 30)
-// // // //   }
-
-// // // //   return {
-// // // //     startDate: start.toISOString().split("T")[0],
-// // // //     endDate: end.toISOString().split("T")[0],
-// // // //   }
-// // // // }
-
-// // // // /* ----------------------------- */
-// // // // /* SAFE GA EXECUTION */
-// // // // /* ----------------------------- */
-
-// // // // async function runGA4Report(request: any) {
-
-// // // //   const client = getClient()
-
-// // // //   const timeout = new Promise((_, reject) =>
-// // // //     setTimeout(() => reject(new Error("GA4 timeout")), 30000)
-// // // //   )
-
-// // // //   const report = client.runReport(request)
-
-// // // //   return Promise.race([report, timeout])
-// // // // }
-
-// // // // /* ----------------------------- */
-// // // // /* UNIVERSAL FETCH */
-// // // // /* ----------------------------- */
-
-// // // // export async function fetchTOFU(
-// // // //   propertyId: string,
-// // // //   startDate: string,
-// // // //   endDate: string,
-// // // //   models: string[] | string,
-// // // //   report: "TOFU" | "MOFU" | "TREND" = "TOFU"
-// // // // ) {
-
-// // // //   try {
-
-// // // //     const range = clampDateRange(startDate, endDate)
-
-// // // //     const requestBody = buildGA4Query({
-// // // //       report,
-// // // //       startDate: range.startDate,
-// // // //       endDate: range.endDate,
-// // // //       models,
-// // // //     })
-
-// // // //     const [response]: any = await runGA4Report({
-// // // //       property: `properties/${propertyId}`,
-// // // //       ...requestBody,
-// // // //     })
-
-// // // //     if (!response?.rows) return []
-
-// // // //     return response.rows
-
-// // // //   } catch (error) {
-
-// // // //     console.error(`GA4 ${report} Fetch Error:`, error)
-
-// // // //     return []
-
-// // // //   }
-
-// // // // }
-
-// // // // /* ----------------------------- */
-// // // // /* MOFU FETCH */
-// // // // /* ----------------------------- */
-
-// // // // export async function fetchMOFU(
-// // // //   propertyId: string,
-// // // //   startDate: string,
-// // // //   endDate: string,
-// // // //   models: string[] | string
-// // // // ) {
-
-// // // //   return fetchTOFU(
-// // // //     propertyId,
-// // // //     startDate,
-// // // //     endDate,
-// // // //     models,
-// // // //     "MOFU"
-// // // //   )
-
-// // // // }
-
-// // // // /* ----------------------------- */
-// // // // /* ENGAGEMENT REPORT */
-// // // // /* ----------------------------- */
-
-// // // // export async function fetchEngagement(
-// // // //   propertyId: string,
-// // // //   startDate: string,
-// // // //   endDate: string
-// // // // ) {
-
-// // // //   try {
-
-// // // //     const range = clampDateRange(startDate, endDate)
-
-// // // //     const [response]: any = await runGA4Report({
-// // // //       property: `properties/${propertyId}`,
-
-// // // //       dateRanges: [
-// // // //         {
-// // // //           startDate: range.startDate,
-// // // //           endDate: range.endDate,
-// // // //         },
-// // // //       ],
-
-// // // //       dimensions: [
-// // // //         { name: "date" },
-// // // //       ],
-
-// // // //       metrics: [
-// // // //         { name: "screenPageViews" },
-// // // //         { name: "totalUsers" },
-// // // //         { name: "averageSessionDuration" },
-// // // //       ],
-// // // //     })
-
-// // // //     if (!response?.rows) return []
-
-// // // //     return response.rows.map((row: any) => {
-
-// // // //       const date = row.dimensionValues?.[0]?.value
-
-// // // //       const pv = Number(row.metricValues?.[0]?.value || 0)
-// // // //       const users = Number(row.metricValues?.[1]?.value || 0)
-// // // //       const duration = Number(row.metricValues?.[2]?.value || 0)
-
-// // // //       return {
-// // // //         date,
-// // // //         pv_uu: users ? pv / users : 0,
-// // // //         avg_session_duration: duration / 60,
-// // // //       }
-
-// // // //     })
-
-// // // //   } catch (error) {
-
-// // // //     console.error("GA4 Engagement Fetch Error:", error)
-
-// // // //     return []
-
-// // // //   }
-
-// // // // }
-
-
-
-
-
-
-
-
-
-
-
-// // // import { BetaAnalyticsDataClient } from "@google-analytics/data"
-// // // import { buildGA4Query } from "./ga4QueryBuilder"
-
-// // // /* ----------------------------- */
-// // // /* SINGLETON CLIENT */
-// // // /* ----------------------------- */
-
-// // // let client: BetaAnalyticsDataClient | null = null
-
-// // // function getClient() {
-
-// // //   if (!client) {
-
-// // //     client = new BetaAnalyticsDataClient({
-// // //       keyFilename: process.env.GA_KEY_FILE,
-// // //     })
-
-// // //   }
-
-// // //   return client
-// // // }
-
-// // // /* ----------------------------- */
-// // // /* DATE CLAMP */
-// // // /* ----------------------------- */
-
-// // // function clampDateRange(startDate: string, endDate: string) {
-
-// // //   if (
-// // //     startDate?.includes("daysAgo") ||
-// // //     endDate === "today"
-// // //   ) {
-// // //     return { startDate, endDate }
-// // //   }
-
-// // //   const end = new Date(endDate)
-// // //   const start = new Date(startDate)
-
-// // //   if (isNaN(end.getTime()) || isNaN(start.getTime())) {
-
-// // //     return {
-// // //       startDate: "7daysAgo",
-// // //       endDate: "today",
-// // //     }
-
-// // //   }
-
-// // //   const diffDays =
-// // //     (end.getTime() - start.getTime()) /
-// // //     (1000 * 60 * 60 * 24)
-
-// // //   if (diffDays > 30) {
-// // //     start.setDate(end.getDate() - 30)
-// // //   }
-
-// // //   return {
-// // //     startDate: start.toISOString().split("T")[0],
-// // //     endDate: end.toISOString().split("T")[0],
-// // //   }
-// // // }
-
-// // // /* ----------------------------- */
-// // // /* SAFE GA EXECUTION */
-// // // /* ----------------------------- */
-
-// // // async function runGA4Report(request: any) {
-
-// // //   const client = getClient()
-
-// // //   const timeout = new Promise((_, reject) =>
-// // //     setTimeout(() => reject(new Error("GA4 timeout")), 30000)
-// // //   )
-
-// // //   const report = client.runReport(request)
-
-// // //   return Promise.race([report, timeout])
-// // // }
-
-// // // /* ----------------------------- */
-// // // /* UNIVERSAL FETCH */
-// // // /* ----------------------------- */
-
-// // // export async function fetchTOFU(
-// // //   propertyId: string,
-// // //   startDate: string,
-// // //   endDate: string,
-// // //   models: string[] | string,
-// // //   report: "TOFU" | "MOFU" | "TREND" = "TOFU"
-// // // ) {
-
-// // //   try {
-
-// // //     const range = clampDateRange(startDate, endDate)
-
-// // //     const requestBody = buildGA4Query({
-// // //       report,
-// // //       startDate: range.startDate,
-// // //       endDate: range.endDate,
-// // //       models,
-// // //     })
-
-// // //     const [response]: any = await runGA4Report({
-// // //       property: `properties/${propertyId}`,
-// // //       ...requestBody,
-// // //     })
-
-// // //     if (!response?.rows) return []
-
-// // //     return response.rows
-
-// // //   } catch (error) {
-
-// // //     console.error(`GA4 ${report} Fetch Error:`, error)
-
-// // //     return []
-
-// // //   }
-
-// // // }
-
-// // // /* ----------------------------- */
-// // // /* MOFU FETCH */
-// // // /* ----------------------------- */
-
-// // // export async function fetchMOFU(
-// // //   propertyId: string,
-// // //   startDate: string,
-// // //   endDate: string,
-// // //   models: string[] | string
-// // // ) {
-
-// // //   return fetchTOFU(
-// // //     propertyId,
-// // //     startDate,
-// // //     endDate,
-// // //     models,
-// // //     "MOFU"
-// // //   )
-
-// // // }
-
-// // // /* ----------------------------- */
-// // // /* ENGAGEMENT REPORT */
-// // // /* ----------------------------- */
-
-// // // export async function fetchEngagement(
-// // //   propertyId: string,
-// // //   startDate: string,
-// // //   endDate: string,
-// // //   models: string[] = [],
-// // //   trafficType: string = "overall"
-// // // ) {
-
-// // //   try {
-
-// // //     const range = clampDateRange(startDate, endDate)
-
-// // //     const request: any = {
-
-// // //       property: `properties/${propertyId}`,
-
-// // //       dateRanges: [
-// // //         {
-// // //           startDate: range.startDate,
-// // //           endDate: range.endDate,
-// // //         },
-// // //       ],
-
-// // //       dimensions: [
-// // //         { name: "date" },
-// // //       ],
-
-// // //       metrics: [
-// // //         { name: "screenPageViews" },
-// // //         { name: "totalUsers" },
-// // //         { name: "averageSessionDuration" },
-// // //       ],
-
-// // //     }
-
-// // //     /* ----------------------------- */
-// // //     /* MODEL FILTER */
-// // // /* ----------------------------- */
-
-// // //     if (models?.length) {
-
-// // //       request.dimensionFilter = {
-
-// // //         filter: {
-
-// // //           fieldName: "pagePath",
-
-// // //           stringFilter: {
-
-// // //             matchType: "PARTIAL_REGEXP",
-
-// // //             value: models.join("|")
-
-// // //           }
-
-// // //         }
-
-// // //       }
-
-// // //     }
-
-// // //     const [response]: any = await runGA4Report(request)
-
-// // //     if (!response?.rows) return []
-
-// // //     return response.rows.map((row: any) => {
-
-// // //       const date =
-// // //         row.dimensionValues?.[0]?.value || ""
-
-// // //       const pv =
-// // //         Number(row.metricValues?.[0]?.value || 0)
-
-// // //       const users =
-// // //         Number(row.metricValues?.[1]?.value || 0)
-
-// // //       const duration =
-// // //         Number(row.metricValues?.[2]?.value || 0)
-
-// // //       return {
-
-// // //         date,
-
-// // //         pv_uu: users ? pv / users : 0,
-
-// // //         avg_session_duration: duration / 60,
-
-// // //       }
-
-// // //     })
-
-// // //   } catch (error) {
-
-// // //     console.error("GA4 Engagement Fetch Error:", error)
-
-// // //     return []
-
-// // //   }
-
-// // // }
-
-
-
-
-
-
-
-
-
-
-
-// // import { BetaAnalyticsDataClient } from "@google-analytics/data"
-// // import { buildGA4Query } from "./ga4QueryBuilder"
-
-// // /* ----------------------------- */
-// // /* SINGLETON CLIENT */
-// // /* ----------------------------- */
-
-// // let client: BetaAnalyticsDataClient | null = null
-
-// // function getClient() {
-
-// //   if (!client) {
-// //     client = new BetaAnalyticsDataClient({
-// //       keyFilename: process.env.GA_KEY_FILE,
-// //     })
-// //   }
-
-// //   return client
-// // }
-
-// // /* ----------------------------- */
-// // /* DATE CLAMP */
-// // /* ----------------------------- */
-
-// // function clampDateRange(startDate: string, endDate: string) {
-
-// //   if (
-// //     startDate?.includes("daysAgo") ||
-// //     endDate === "today"
-// //   ) {
-// //     return { startDate, endDate }
-// //   }
-
-// //   const end = new Date(endDate)
-// //   const start = new Date(startDate)
-
-// //   if (isNaN(end.getTime()) || isNaN(start.getTime())) {
-// //     return {
-// //       startDate: "7daysAgo",
-// //       endDate: "today",
-// //     }
-// //   }
-
-// //   const diffDays =
-// //     (end.getTime() - start.getTime()) /
-// //     (1000 * 60 * 60 * 24)
-
-// //   if (diffDays > 30) {
-// //     start.setDate(end.getDate() - 30)
-// //   }
-
-// //   return {
-// //     startDate: start.toISOString().split("T")[0],
-// //     endDate: end.toISOString().split("T")[0],
-// //   }
-// // }
-
-// // /* ----------------------------- */
-// // /* SAFE GA EXECUTION */
-// // /* ----------------------------- */
-
-// // async function runGA4Report(request: any) {
-
-// //   const client = getClient()
-
-// //   const timeout = new Promise((_, reject) =>
-// //     setTimeout(() => reject(new Error("GA4 timeout")), 30000)
-// //   )
-
-// //   const report = client.runReport(request)
-
-// //   return Promise.race([report, timeout])
-// // }
-
-// // /* ----------------------------- */
-// // /* UNIVERSAL FETCH */
-// // /* ----------------------------- */
-
-// // export async function fetchTOFU(
-// //   propertyId: string,
-// //   startDate: string,
-// //   endDate: string,
-// //   models: string[] | string,
-// //   report: "TOFU" | "MOFU" | "TREND" = "TOFU"
-// // ) {
-
-// //   try {
-
-// //     const range = clampDateRange(startDate, endDate)
-
-// //     const requestBody = buildGA4Query({
-// //       report,
-// //       startDate: range.startDate,
-// //       endDate: range.endDate,
-// //       models,
-// //     })
-
-// //     const [response]: any = await runGA4Report({
-// //       property: `properties/${propertyId}`,
-// //       ...requestBody,
-// //     })
-
-// //     if (!response?.rows) return []
-
-// //     return response.rows
-
-// //   } catch (error) {
-
-// //     console.error(`GA4 ${report} Fetch Error:`, error)
-
-// //     return []
-
-// //   }
-
-// // }
-
-// // /* ----------------------------- */
-// // /* MOFU FETCH */
-// // /* ----------------------------- */
-
-// // export async function fetchMOFU(
-// //   propertyId: string,
-// //   startDate: string,
-// //   endDate: string,
-// //   models: string[] | string
-// // ) {
-
-// //   return fetchTOFU(
-// //     propertyId,
-// //     startDate,
-// //     endDate,
-// //     models,
-// //     "MOFU"
-// //   )
-
-// // }
-
-// // /* ----------------------------- */
-// // /* ENGAGEMENT REPORT */
-// // /* ----------------------------- */
-
-// // export async function fetchEngagement(
-// //   propertyId: string,
-// //   startDate: string,
-// //   endDate: string
-// // ) {
-
-// //   try {
-
-// //     const range = clampDateRange(startDate, endDate)
-
-// //     const [response]: any = await runGA4Report({
-
-// //       property: `properties/${propertyId}`,
-
-// //       dateRanges: [
-// //         {
-// //           startDate: range.startDate,
-// //           endDate: range.endDate,
-// //         },
-// //       ],
-
-// //       dimensions: [
-// //         { name: "date" }
-// //       ],
-
-// //       metrics: [
-// //         { name: "screenPageViews" },
-// //         { name: "totalUsers" },
-// //         { name: "averageSessionDuration" }
-// //       ]
-
-// //     })
-
-// //     if (!response?.rows) return []
-
-// //     return response.rows.map((row: any) => {
-
-// //       const date =
-// //         row.dimensionValues?.[0]?.value || ""
-
-// //       const pageViews =
-// //         Number(row.metricValues?.[0]?.value ?? 0)
-
-// //       const users =
-// //         Number(row.metricValues?.[1]?.value ?? 1)
-
-// //       const sessionDuration =
-// //         Number(row.metricValues?.[2]?.value ?? 0)
-
-// //       return {
-
-// //         date,
-
-// //         pv_uu: users ? pageViews / users : 0,
-
-// //         avg_session_duration: sessionDuration / 60
-
-// //       }
-
-// //     })
-
-// //   } catch (error) {
-
-// //     console.error("GA4 Engagement Fetch Error:", error)
-
-// //     return []
-
-// //   }
-
-// // }
-
-
-
-
-
-
-
-
-
 import { BetaAnalyticsDataClient } from "@google-analytics/data"
-import { buildGA4Query } from "./ga4QueryBuilder"
+
+/* ----------------------------- */
+/* VALID METRICS */
+/* ----------------------------- */
+
+const VALID_METRICS = [
+  "totalUsers",
+  "sessions",
+  "engagementRate",
+  "averageSessionDuration",
+  "screenPageViews"
+]
+
+function validateMetrics(metrics: { name: string }[]) {
+  for (const metric of metrics) {
+    if (!VALID_METRICS.includes(metric.name)) {
+      throw new Error(`Invalid GA metric used: ${metric.name}`)
+    }
+  }
+}
 
 /* ----------------------------- */
 /* SINGLETON CLIENT */
@@ -1327,25 +27,35 @@ import { buildGA4Query } from "./ga4QueryBuilder"
 let client: BetaAnalyticsDataClient | null = null
 
 function getClient() {
-
   if (!client) {
     client = new BetaAnalyticsDataClient({
-      keyFilename: process.env.GA_KEY_FILE,
+      keyFilename: process.env.GA_KEY_FILE
     })
   }
-
   return client
 }
 
 /* ----------------------------- */
-/* SIMPLE IN-MEMORY CACHE */
+/* SIMPLE CACHE */
 /* ----------------------------- */
 
 const gaCache = new Map<string, any>()
-const CACHE_TTL = 60 * 1000 // 1 minute
+const CACHE_TTL = 60000
 
 function getCacheKey(request: any) {
   return JSON.stringify(request)
+}
+
+function getCache(key: string) {
+  const cached = gaCache.get(key)
+  if (!cached) return null
+
+  if (Date.now() - cached.timestamp > CACHE_TTL) {
+    gaCache.delete(key)
+    return null
+  }
+
+  return cached.value
 }
 
 function setCache(key: string, value: any) {
@@ -1355,151 +65,277 @@ function setCache(key: string, value: any) {
   })
 }
 
-function getCache(key: string) {
-
-  const cached = gaCache.get(key)
-
-  if (!cached) return null
-
-  const isExpired =
-    Date.now() - cached.timestamp > CACHE_TTL
-
-  if (isExpired) {
-    gaCache.delete(key)
-    return null
-  }
-
-  return cached.value
-}
-
 /* ----------------------------- */
-/* DATE CLAMP */
+/* DATE HELPERS */
 /* ----------------------------- */
+
+const GA4_RELATIVE_DATE = /^(\d+daysAgo|today|yesterday)$/i
 
 function clampDateRange(startDate: string, endDate: string) {
-
-  if (
-    startDate?.includes("daysAgo") ||
-    endDate === "today"
-  ) {
+  if (GA4_RELATIVE_DATE.test(startDate) || GA4_RELATIVE_DATE.test(endDate)) {
     return { startDate, endDate }
   }
 
-  const end = new Date(endDate)
   const start = new Date(startDate)
+  const end = new Date(endDate)
 
-  if (isNaN(end.getTime()) || isNaN(start.getTime())) {
-    return {
-      startDate: "7daysAgo",
-      endDate: "today",
-    }
+  if (isNaN(start.getTime()) || isNaN(end.getTime())) {
+    return { startDate: "180daysAgo", endDate: "today" }
   }
 
-  const diffDays =
-    (end.getTime() - start.getTime()) /
-    (1000 * 60 * 60 * 24)
+  const diff = (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
 
-  if (diffDays > 30) {
+  if (diff > 30) {
     start.setDate(end.getDate() - 30)
   }
 
   return {
     startDate: start.toISOString().split("T")[0],
-    endDate: end.toISOString().split("T")[0],
+    endDate: end.toISOString().split("T")[0]
+  }
+}
+
+function clampHeatmapDateRange(startDate: string, endDate: string) {
+  if (GA4_RELATIVE_DATE.test(startDate) || GA4_RELATIVE_DATE.test(endDate)) {
+    return { startDate, endDate }
+  }
+
+  const start = new Date(startDate)
+  const end = new Date(endDate)
+
+  const diff = (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)
+
+  if (diff > 365) {
+    const newStart = new Date(end)
+    newStart.setMonth(newStart.getMonth() - 12)
+
+    return {
+      startDate: newStart.toISOString().split("T")[0],
+      endDate: end.toISOString().split("T")[0]
+    }
+  }
+
+  return {
+    startDate,
+    endDate
   }
 }
 
 /* ----------------------------- */
-/* SAFE GA EXECUTION + CACHE */
+/* HOSTNAME FILTER */
+/* ----------------------------- */
+
+function hostnameFilter() {
+  return {
+    filter: {
+      fieldName: "hostName",
+      stringFilter: {
+        matchType: "FULL_REGEXP",
+        value:
+          "(?i).*(www.cardekho|hindi.cardekho|tamil.cardekho|telugu.cardekho|kannada.cardekho|malayalam.cardekho|ai.cardekho).*"
+      }
+    }
+  }
+}
+
+/* ----------------------------- */
+/* GLOBAL FILTERS */
+/* ----------------------------- */
+
+function buildGlobalFilters() {
+  return {
+    andGroup: {
+      expressions: [
+        hostnameFilter(),
+
+        {
+          notExpression: {
+            filter: {
+              fieldName: "pagePathPlusQueryString",
+              stringFilter: {
+                matchType: "CONTAINS",
+                value: "used"
+              }
+            }
+          }
+        },
+
+        {
+          notExpression: {
+            filter: {
+              fieldName: "pagePath",
+              stringFilter: {
+                matchType: "CONTAINS",
+                value: "virtual"
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
+
+/* ----------------------------- */
+/* PAGE VIEW FILTER */
+/* ----------------------------- */
+
+function pageViewFilter() {
+  return {
+    filter: {
+      fieldName: "eventName",
+      stringFilter: {
+        value: "page_view"
+      }
+    }
+  }
+}
+
+/* ----------------------------- */
+/* SAFE GA EXECUTION */
 /* ----------------------------- */
 
 async function runGA4Report(request: any) {
 
   const key = getCacheKey(request)
-
   const cached = getCache(key)
+
   if (cached) return cached
 
   const client = getClient()
 
-  const timeout = new Promise((_, reject) =>
-    setTimeout(() => reject(new Error("GA4 timeout")), 35000)
-  )
-
-  const report = client.runReport(request)
-
-  const result = await Promise.race([report, timeout])
-
-  setCache(key, result)
-
-  return result
-}
-
-/* ----------------------------- */
-/* UNIVERSAL FETCH */
-/* ----------------------------- */
-
-export async function fetchTOFU(
-  propertyId: string,
-  startDate: string,
-  endDate: string,
-  models: string[] | string,
-  report: "TOFU" | "MOFU" | "TREND" | "TRAFFIC_EROSION" = "TOFU"
-) {
+  if (request.metrics) validateMetrics(request.metrics)
 
   try {
 
-    const range = clampDateRange(startDate, endDate)
+    const response = await client.runReport(request)
 
-    const requestBody = buildGA4Query({
-      report,
-      startDate: range.startDate,
-      endDate: range.endDate,
-      models,
-    })
+    setCache(key, response)
 
-    const [response]: any = await runGA4Report({
-      property: `properties/${propertyId}`,
-      ...requestBody,
-    })
-
-    if (!response?.rows) return []
-
-    return response.rows
+    return response
 
   } catch (error) {
 
-    console.error(`GA4 ${report} Fetch Error:`, error)
-
-    return []
+    console.error("GA4 error:", error)
+    throw error
 
   }
-
 }
 
 /* ----------------------------- */
-/* MOFU FETCH */
+/* TRAFFIC (TOFU) */
 /* ----------------------------- */
 
-export async function fetchMOFU(
+export async function fetchTraffic(
   propertyId: string,
   startDate: string,
   endDate: string,
-  models: string[] | string
+  baseModel?: string
 ) {
 
-  return fetchTOFU(
-    propertyId,
-    startDate,
-    endDate,
-    models,
-    "MOFU"
-  )
+  const range = clampDateRange(startDate, endDate)
 
+  const request = {
+
+    property: `properties/${propertyId}`,
+
+    dateRanges: [{ startDate: range.startDate, endDate: range.endDate }],
+
+    dimensions: [
+      { name: "date" },
+      { name: "customEvent:modelName" }
+    ],
+
+    metrics: [
+      { name: "totalUsers" },
+      { name: "screenPageViews" }
+    ],
+
+    dimensionFilter: {
+      andGroup: {
+        expressions: [
+          buildGlobalFilters(),
+          pageViewFilter()
+        ]
+      }
+    },
+
+    limit: 50000
+  }
+
+  const [response]: any = await runGA4Report(request)
+
+  return response?.rows || []
 }
 
 /* ----------------------------- */
-/* ENGAGEMENT REPORT */
+/* PAGE BEHAVIOUR */
+/* ----------------------------- */
+
+/* ----------------------------- */
+/* PAGE BEHAVIOUR (MOFU PAGES) */
+/* ----------------------------- */
+
+export async function fetchPageBehaviour(
+  propertyId: string,
+  startDate: string,
+  endDate: string
+) {
+
+  const range = clampDateRange(startDate, endDate)
+
+  const request = {
+
+    property: `properties/${propertyId}`,
+
+    dateRanges: [
+      {
+        startDate: range.startDate,
+        endDate: range.endDate
+      }
+    ],
+
+    dimensions: [
+      { name: "customEvent:modelName" },
+    ],
+
+    metrics: [
+      { name: "totalUsers" },
+      { name: "screenPageViews" }
+    ],
+
+    dimensionFilter: {
+      andGroup: {
+        expressions: [
+
+          buildGlobalFilters(),
+
+          {
+            filter: {
+              fieldName: "customEvent:pageTemplates",
+              stringFilter: {
+                matchType: "PARTIAL_REGEXP",
+                value: "(?i).*(price|spec|offer|dealer|compar|disc).*"
+              }
+            }
+          }
+
+        ]
+      }
+    },
+
+    limit: 50000
+  }
+
+  const [response]: any = await runGA4Report(request)
+
+  return response?.rows || []
+}
+
+
+
+/* ----------------------------- */
+/* ENGAGEMENT (PV/UU) */
 /* ----------------------------- */
 
 export async function fetchEngagement(
@@ -1508,78 +344,312 @@ export async function fetchEngagement(
   endDate: string
 ) {
 
-  try {
+  const range = clampDateRange(startDate, endDate)
 
-    const range = clampDateRange(startDate, endDate)
+  const request = {
 
-    const request = {
+    property: `properties/${propertyId}`,
 
-      property: `properties/${propertyId}`,
+    dateRanges: [
+      {
+        startDate: range.startDate,
+        endDate: range.endDate
+      }
+    ],
 
-      dateRanges: [
-        {
-          startDate: range.startDate,
-          endDate: range.endDate,
-        },
-      ],
+    dimensions: [
+      { name: "date" },
+      { name: "customEvent:modelName" }
+    ],
 
-      dimensions: [
-        { name: "date" }
-      ],
+    metrics: [
+      { name: "screenPageViews" },
+      { name: "totalUsers" },
+      { name: "averageSessionDuration" }
+    ],
 
-      metrics: [
-        { name: "screenPageViews" },
-        { name: "totalUsers" },
-        { name: "averageSessionDuration" }
-      ]
+    /* IMPORTANT: NO pageViewFilter() */
 
+    dimensionFilter: {
+      andGroup: {
+        expressions: [
+          buildGlobalFilters()
+        ]
+      }
+    },
+
+    limit: 50000
+  }
+
+  const [response]: any = await runGA4Report(request)
+
+  if (!response?.rows) return []
+
+  const monthModelMap: any = {}
+
+  response.rows.forEach((row: any) => {
+
+    const date = row.dimensionValues?.[0]?.value
+    const model = row.dimensionValues?.[1]?.value || "(not_set)"
+
+    const month = date.slice(0,6)
+
+    const key = `${month}_${model}`
+
+    const pv = Number(row.metricValues?.[0]?.value ?? 0)
+    const users = Number(row.metricValues?.[1]?.value ?? 0)
+    const duration = Number(row.metricValues?.[2]?.value ?? 0)
+
+    if (!monthModelMap[key]) {
+      monthModelMap[key] = {
+        month,
+        model,
+        pv: 0,
+        users: 0,
+        duration: 0,
+        days: 0
+      }
     }
+
+    monthModelMap[key].pv += pv
+    monthModelMap[key].users += users
+    monthModelMap[key].duration += duration
+    monthModelMap[key].days += 1
+
+  })
+
+  return Object.values(monthModelMap).map((m:any)=>({
+
+    month: `${m.month.slice(0,4)}-${m.month.slice(4,6)}`,
+
+    model: m.model,
+
+    /* PV per User */
+    pv_uu: m.users
+      ? Number((m.pv / m.users).toFixed(2))
+      : 0,
+
+    /* Session Duration (minutes) */
+    avg_session_duration: m.days
+      ? Number((m.duration / m.days / 60).toFixed(2))
+      : 0
+
+  }))
+}
+
+/* ----------------------------- */
+/* HEATMAP */
+/* ----------------------------- */
+/* ----------------------------- */
+/* ORGANIC / INORGANIC FILTER */
+/* ----------------------------- */
+
+const ORGANIC_EXCLUDE =
+  "(?i).*(chrome_notification|communication|connecto|moengage|sms|cpc|display|facebook|social|whatsapp|NA).*"
+
+function trafficFilter(type: "overall" | "organic" | "inorganic") {
+
+  if (type === "organic") {
+
+    return {
+      notExpression: {
+        filter: {
+          fieldName: "sessionSourceMedium",
+          stringFilter: {
+            matchType: "FULL_REGEXP",
+            value: ORGANIC_EXCLUDE,
+            caseSensitive: false
+          }
+        }
+      }
+    }
+
+  }
+
+  if (type === "inorganic") {
+
+    return {
+      filter: {
+        fieldName: "sessionSourceMedium",
+        stringFilter: {
+          matchType: "FULL_REGEXP",
+          value: ORGANIC_EXCLUDE,
+          caseSensitive: false
+        }
+      }
+    }
+
+  }
+
+  return null
+}
+export async function fetchHeatmap(
+  propertyId: string,
+  startDate: string,
+  endDate: string,
+  models: string[] = [],
+  trafficType: "overall" | "organic" | "inorganic" = "overall"
+) {
+
+  const range = clampHeatmapDateRange(startDate, endDate)
+
+  const modelFilterExpressions = models.length
+    ? [{
+        orGroup: {
+          expressions: models.map(model => ({
+            filter: {
+              fieldName: "customEvent:modelName",
+              stringFilter: {
+                matchType: "FULL_REGEXP",
+                value: `(?i).*${model.replace(/[_-]/g,".*")}.*`,
+                caseSensitive: false
+              }
+            }
+          }))
+        }
+      }]
+    : []
+
+  const request = {
+
+    property: `properties/${propertyId}`,
+
+    dateRanges: [
+      { startDate: range.startDate, endDate: range.endDate }
+    ],
+
+    dimensions: [
+      { name: "yearMonth" },
+      { name: "customEvent:modelName" }
+    ],
+
+    metrics: [
+      { name: "totalUsers" },
+      { name: "screenPageViews" }
+    ],
+
+    dimensionFilter: {
+      andGroup: {
+        expressions: [
+          buildGlobalFilters(),
+          ...modelFilterExpressions,
+          {
+            filter: {
+              fieldName: "customEvent:pageTemplates",
+              stringFilter: {
+                matchType: "PARTIAL_REGEXP",
+                value: "(?i).*(price|spec|offer|dealer|compar|disc).*"
+              }
+            }
+          }
+        ]
+      }
+    },
+
+    limit: 50000
+  }
+
+  try {
 
     const [response]: any = await runGA4Report(request)
 
-    if (!response?.rows) return []
-
-    return response.rows.map((row: any) => {
-
-      const date =
-        row.dimensionValues?.[0]?.value || ""
-
-      const pageViews =
-        Number(row.metricValues?.[0]?.value ?? 0)
-
-      const users =
-        Number(row.metricValues?.[1]?.value ?? 1)
-
-      const sessionDuration =
-        Number(row.metricValues?.[2]?.value ?? 0)
-
-      return {
-
-        date,
-
-        pv_uu: users ? pageViews / users : 0,
-
-        avg_session_duration: sessionDuration / 60
-
-      }
-
-    })
+    return response?.rows || []
 
   } catch (error) {
 
-    console.error("GA4 Engagement Fetch Error:", error)
+    console.error("Heatmap API error:", error)
+    return []
+
+  }
+}
+/* ----------------------------- */
+/* TRAFFIC EROSION (COMPETITOR) */
+/* ----------------------------- */
+
+/* ----------------------------- */
+/* TRAFFIC EROSION (COMPETITOR) */
+/* ----------------------------- */
+
+export async function fetchTrafficErosion(
+  propertyId: string,
+  startDate: string,
+  endDate: string,
+  baseModel: string
+) {
+
+  const range = clampDateRange(startDate, endDate)
+
+  const request = {
+
+    property: `properties/${propertyId}`,
+
+    dateRanges: [
+      { startDate: range.startDate, endDate: range.endDate }
+    ],
+
+    dimensions: [
+      { name: "customEvent:modelName" }
+    ],
+
+    metrics: [
+      { name: "totalUsers" }
+    ],
+
+    dimensionFilter: {
+      andGroup: {
+        expressions: [
+          buildGlobalFilters(),
+          pageViewFilter()
+        ]
+      }
+    },
+
+    /* USER SEGMENT = VISITED BASE MODEL */
+
+    segments: [
+      {
+        userSegment: {
+          segmentFilters: [
+            {
+              simpleSegment: {
+                orFiltersForSegment: [
+                  {
+                    segmentFilterClauses: [
+                      {
+                        dimensionFilter: {
+                          filter: {
+                            fieldName: "customEvent:modelName",
+                            stringFilter: {
+                              matchType: "FULL_REGEXP",
+                              value: `(?i).*${baseModel.replace(/[_-]/g,".*")}.*`
+                            }
+                          }
+                        }
+                      }
+                    ]
+                  }
+                ]
+              }
+            }
+          ]
+        }
+      }
+    ],
+
+    limit: 50000
+  }
+
+  try {
+
+    const [response]: any = await runGA4Report(request)
+
+    return response?.rows || []
+
+  } catch (error) {
+
+    console.error("Traffic erosion API error:", error)
 
     return []
 
   }
-
 }
-
-
-
-
-
-
-
-
-

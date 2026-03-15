@@ -34,9 +34,9 @@ export interface TrafficShareItem {
 
 export interface CompetitorRow {
   model: string
-  trafficErosionRank: number
-  reverseTrafficErosionRank: number
-  performance: 'high' | 'medium' | 'low'
+  trafficErosionRank: number | null
+  reverseErosionRank: number | null
+  performance: 'high' | 'medium' | 'low' | null
 }
 
 export interface DeviceData {

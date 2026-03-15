@@ -17,11 +17,12 @@ import { Button } from '@/components/ui/button'
 import type { CompetitorRow } from '@/lib/types'
 
 interface ComparisonTableProps {
+  
   data: CompetitorRow[] | undefined
   isLoading: boolean
 }
 
-type SortKey = 'model' | 'trafficErosionRank' | 'reverseTrafficErosionRank' | 'performance'
+type SortKey = 'model' | 'trafficErosionRank' | 'reverseErosionRank' | 'performance'
 
 const performanceOrder: Record<string, number> = {
   high: 3,
@@ -87,6 +88,7 @@ export function ComparisonTable({ data, isLoading }: ComparisonTableProps) {
   }
 
   const handleSort = (key: SortKey) => {
+
     console.log('🔁 Sorting by:', key)
 
     if (sortKey === key) {
@@ -96,7 +98,8 @@ export function ComparisonTable({ data, isLoading }: ComparisonTableProps) {
       setSortAsc(true)
     }
   }
-
+  
+  console.log("TABLE DATA:", data)
   const sorted = [...data].sort((a, b) => {
 
     let cmp = 0
@@ -115,8 +118,13 @@ export function ComparisonTable({ data, isLoading }: ComparisonTableProps) {
 
     else {
 
-      const valA = a[sortKey] ?? 0
-      const valB = b[sortKey] ?? 0
+      /* ----------------------------- */
+      /* IMPORTANT FIX */
+      /* Send missing ranks to bottom */
+      /* ----------------------------- */
+
+      const valA = a[sortKey] ?? Infinity
+      const valB = b[sortKey] ?? Infinity
 
       cmp = valA - valB
     }
@@ -148,7 +156,7 @@ export function ComparisonTable({ data, isLoading }: ComparisonTableProps) {
               {[
                 { key: 'model' as const, label: 'Model Name' },
                 { key: 'trafficErosionRank' as const, label: 'Traffic Erosion Rank' },
-                { key: 'reverseTrafficErosionRank' as const, label: 'Reverse Erosion Rank' },
+                { key: 'reverseErosionRank' as const, label: 'Reverse Erosion Rank' },
                 { key: 'performance' as const, label: 'Performance' },
               ].map((col) => (
                 <TableHead key={col.key}>
@@ -181,12 +189,16 @@ export function ComparisonTable({ data, isLoading }: ComparisonTableProps) {
                   </TableCell>
 
                   <TableCell className="font-mono text-sm">
-                    #{row.trafficErosionRank ?? '-'}
-                  </TableCell>
+  {row.trafficErosionRank !== null && row.trafficErosionRank !== undefined
+    ? `#${row.trafficErosionRank}`
+    : '-'}
+</TableCell>
 
-                  <TableCell className="font-mono text-sm">
-                    #{row.reverseTrafficErosionRank ?? '-'}
-                  </TableCell>
+<TableCell className="font-mono text-sm">
+  {row.reverseErosionRank !== null && row.reverseErosionRank !== undefined
+    ? `#${row.reverseErosionRank}`
+    : '-'}
+</TableCell>
 
                   <TableCell>
 

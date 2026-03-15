@@ -1,106 +1,123 @@
-import { NextRequest, NextResponse } from "next/server"
-import { fetchTOFU } from "@/services/ga4Service"
+import { NextResponse } from "next/server"
+import fs from "fs"
+import path from "path"
 
-function normalize(name: string) {
-return name
-.replace(/\d{4}-\d{4}/g, "")
-.trim()
-.toLowerCase()
+/* ----------------------------- */
+/* NORMALIZE MODEL NAMES         */
+/* ----------------------------- */
+
+function normalize(str: string) {
+  return str
+    .toLowerCase()
+    .replace(/[_-]/g, " ")
+    .replace(/\s+/g, " ")
+    .trim()
 }
 
-export async function GET(req: NextRequest) {
+export async function GET(req: Request) {
 
-try {
+  const { searchParams } = new URL(req.url)
+  const focus = searchParams.get("focus")
 
-const propertyId = process.env.GA_PROPERTY_ID!
+  if (!focus) {
+    return NextResponse.json({ data: [] })
+  }
 
-const { searchParams } = new URL(req.url)
+  const focusNormalized = normalize(focus)
 
-const start = searchParams.get("start") || "30daysAgo"
-const end = searchParams.get("end") || "today"
-const models = searchParams.get("models") || ""
+  /* ----------------------------- */
+  /* LOAD JSON DATASETS            */
+  /* ----------------------------- */
 
-const modelList = models.split(",").filter(Boolean)
+  const erosionPath = path.join(process.cwd(), "data/traffic_erosion.json")
+  const reversePath = path.join(process.cwd(), "data/reverse_traffic_erosion.json")
 
-/* normalize selected models */
+  const erosion = JSON.parse(fs.readFileSync(erosionPath, "utf-8"))
+  const reverse = JSON.parse(fs.readFileSync(reversePath, "utf-8"))
 
-const selectedModels =
-  modelList.map(m => normalize(m))
+  /* ----------------------------- */
+  /* BUILD REVERSE LOOKUP MAP      */
+  /* key = focus|competitor        */
+  /* ----------------------------- */
 
-const rows = await fetchTOFU(
-  propertyId,
-  start,
-  end,
-  modelList,
-  "TOFU"
+  const reverseMap = new Map<string, number>()
+
+  reverse.forEach((r: any) => {
+
+    const focusModel = normalize(r.focus)
+    const competitorModel = normalize(r.competitor)
+
+    const key = focusModel + "|" + competitorModel
+
+    reverseMap.set(key, r.rank)
+  })
+
+  console.log(
+    "Reverse map sample:",
+    Array.from(reverseMap.entries()).slice(0, 5)
+  )
+
+  /* ----------------------------- */
+  /* FILTER EROSION DATA           */
+  /* ----------------------------- */
+
+  let erosionRows = erosion.filter(
+  (row: any) => normalize(row.focus) === focusNormalized
 )
 
-const totals: Record<string, number> = {}
+// if no rows found, flip direction
+if (erosionRows.length === 0) {
+  erosionRows = erosion
+    .filter((row: any) => normalize(row.competitor) === focusNormalized)
+    .map((row: any) => ({
+      focus: row.competitor,
+      competitor: row.focus,
+      rank: row.rank
+    }))
+}
+  /* ----------------------------- */
+  /* BUILD FINAL RESULT            */
+  /* ----------------------------- */
 
-for (const row of rows) {
+  const result = erosionRows.map((row: any) => {
 
-  const rawModel = row.dimensionValues?.[0]?.value
-  const users = Number(row.metricValues?.[0]?.value || 0)
+    const competitor = normalize(row.competitor)
 
-  if (!rawModel) continue
+    // IMPORTANT: same order as map
+    const reverseKey = focusNormalized + "|" + competitor
 
-  const model = normalize(rawModel)
+    const reverseRank = reverseMap.get(reverseKey) ?? null
+
+    return {
+      model: competitor,
+      trafficErosionRank: row.rank,
+      reverseErosionRank: reverseRank,
+      performance: null
+    }
+  })
 
   /* ----------------------------- */
-  /* FILTER ONLY SELECTED MODELS */
+  /* DEBUG                         */
   /* ----------------------------- */
 
-  if (!selectedModels.includes(model)) continue
+  console.log("Focus model:", focusNormalized)
 
-  totals[model] = (totals[model] || 0) + users
-}
+  console.log(
+    "Erosion rows sample:",
+    erosionRows.slice(0, 5)
+  )
 
-/* ----------------------------- */
-/* SORT BY TRAFFIC */
-/* ----------------------------- */
+  console.log(
+    "Final result sample:",
+    result.slice(0, 5)
+  )
 
-const sorted =
-  Object.entries(totals)
-    .sort((a, b) => b[1] - a[1])
+  /* ----------------------------- */
+  /* RESPONSE                      */
+  /* ----------------------------- */
 
-/* ----------------------------- */
-/* DO NOT FORCE TOP 10 */
-/* RETURN ONLY SELECTED MODELS */
-/* ----------------------------- */
-
-const data = sorted.map(([model, traffic], index) => ({
-
-  model,
-
-  trafficErosionRank: index + 1,
-
-  reverseTrafficErosionRank:
-    sorted.length - index,
-
-  performance:
-    index < 3
-      ? "high"
-      : index < 6
-      ? "medium"
-      : "low",
-
-  traffic
-}))
-
-return NextResponse.json({
-  success: true,
-  data
-})
-
-} catch (error) {
-
-console.error("Competitor API error", error)
-
-return NextResponse.json({
-  success: false,
-  data: []
-})
-
-}
-
+  return NextResponse.json({
+    focus: focusNormalized,
+    data: result
+  })
 }

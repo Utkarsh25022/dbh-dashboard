@@ -1,174 +1,341 @@
+// // // // // import { NextRequest, NextResponse } from "next/server"
+// // // // // import { fetchTOFU } from "@/services/ga4Service"
+
+// // // // // function normalize(name: string) {
+// // // // // return name
+// // // // // .replace(/\d{4}-\d{4}/g, "")
+// // // // // .trim()
+// // // // // .toLowerCase()
+// // // // // }
+
+// // // // // export async function GET(req: NextRequest) {
+
+// // // // // try {
+
+
+// // // // // const propertyId = process.env.GA_PROPERTY_ID!
+
+// // // // // const { searchParams } = new URL(req.url)
+
+// // // // // const start = searchParams.get("start") || "30daysAgo"
+// // // // // const end = searchParams.get("end") || "today"
+// // // // // const models = searchParams.get("models") || ""
+
+// // // // // const modelList = models.split(",").filter(Boolean)
+
+// // // // // const rows = await fetchTOFU(
+// // // // //   propertyId,
+// // // // //   start,
+// // // // //   end,
+// // // // //   modelList,
+// // // // //   "TOFU"
+// // // // // )
+
+// // // // // const totals: Record<string, number> = {}
+
+// // // // // for (const row of rows) {
+
+// // // // //   const rawModel =
+// // // // //     row.dimensionValues?.[0]?.value
+
+// // // // //   const users =
+// // // // //     Number(row.metricValues?.[0]?.value || 0)
+
+// // // // //   if (!rawModel) continue
+
+// // // // //   const model = normalize(rawModel)
+
+// // // // //   totals[model] =
+// // // // //     (totals[model] || 0) + users
+// // // // // }
+
+// // // // // const grandTotal =
+// // // // //   Object.values(totals)
+// // // // //     .reduce((a, b) => a + b, 0) || 1
+
+// // // // // let data =
+// // // // //   Object.entries(totals).map(
+// // // // //     ([model, users]) => {
+
+// // // // //       const share =
+// // // // //         (users / grandTotal) * 100
+
+// // // // //       return {
+// // // // //         model,
+// // // // //         searchShare:
+// // // // //           Number(share.toFixed(2)),
+// // // // //         trafficShare:
+// // // // //           Number(share.toFixed(2)),
+// // // // //         pageViewsShare:
+// // // // //           Number(share.toFixed(2))
+// // // // //       }
+// // // // //     }
+// // // // //   )
+
+// // // // // /* ----------------------------- */
+// // // // // /* SORT MODELS BY SHARE */
+// // // // // /* ----------------------------- */
+
+// // // // // data = data.sort(
+// // // // //   (a, b) =>
+// // // // //     b.trafficShare - a.trafficShare
+// // // // // )
+
+// // // // // /* ----------------------------- */
+// // // // // /* LIMIT TO TOP 20 + OTHERS */
+// // // // // /* ----------------------------- */
+
+// // // // // const TOP_LIMIT = 20
+
+// // // // // const topModels =
+// // // // //   data.slice(0, TOP_LIMIT)
+
+// // // // // const remaining =
+// // // // //   data.slice(TOP_LIMIT)
+
+// // // // // if (remaining.length) {
+
+// // // // //   const others = {
+
+// // // // //     model: "others",
+
+// // // // //     searchShare:
+// // // // //       Number(
+// // // // //         remaining
+// // // // //           .reduce(
+// // // // //             (sum, m) =>
+// // // // //               sum + m.searchShare,
+// // // // //             0
+// // // // //           )
+// // // // //           .toFixed(2)
+// // // // //       ),
+
+// // // // //     trafficShare:
+// // // // //       Number(
+// // // // //         remaining
+// // // // //           .reduce(
+// // // // //             (sum, m) =>
+// // // // //               sum + m.trafficShare,
+// // // // //             0
+// // // // //           )
+// // // // //           .toFixed(2)
+// // // // //       ),
+
+// // // // //     pageViewsShare:
+// // // // //       Number(
+// // // // //         remaining
+// // // // //           .reduce(
+// // // // //             (sum, m) =>
+// // // // //               sum + m.pageViewsShare,
+// // // // //             0
+// // // // //           )
+// // // // //           .toFixed(2)
+// // // // //       )
+
+// // // // //   }
+
+// // // // //   topModels.push(others)
+// // // // // }
+
+// // // // // return NextResponse.json({
+// // // // //   success: true,
+// // // // //   data: topModels
+// // // // // })
+
+
+// // // // // } catch (error) {
+
+
+// // // // // console.error(
+// // // // //   "Traffic share error",
+// // // // //   error
+// // // // // )
+
+// // // // // return NextResponse.json({
+// // // // //   success: false,
+// // // // //   data: []
+// // // // // })
+
+// // // // // }
+
+// // // // // }
+
+
+
+
+
+
+
+
+
+
+
+
 // // // // import { NextRequest, NextResponse } from "next/server"
 // // // // import { fetchTOFU } from "@/services/ga4Service"
 
 // // // // function normalize(name: string) {
-// // // // return name
-// // // // .replace(/\d{4}-\d{4}/g, "")
-// // // // .trim()
-// // // // .toLowerCase()
+// // // //   return name
+// // // //     .replace(/\d{4}-\d{4}/g, "")
+// // // //     .trim()
+// // // //     .toLowerCase()
 // // // // }
 
 // // // // export async function GET(req: NextRequest) {
 
-// // // // try {
+// // // //   try {
 
+// // // //     const propertyId = process.env.GA_PROPERTY_ID!
 
-// // // // const propertyId = process.env.GA_PROPERTY_ID!
+// // // //     const { searchParams } = new URL(req.url)
 
-// // // // const { searchParams } = new URL(req.url)
+// // // //     const start = searchParams.get("start") || "30daysAgo"
+// // // //     const end = searchParams.get("end") || "today"
+// // // //     const models = searchParams.get("models") || ""
 
-// // // // const start = searchParams.get("start") || "30daysAgo"
-// // // // const end = searchParams.get("end") || "today"
-// // // // const models = searchParams.get("models") || ""
+// // // //     const modelList = models.split(",").filter(Boolean)
 
-// // // // const modelList = models.split(",").filter(Boolean)
+// // // //     /* ---------------- NO MODEL SELECTED ---------------- */
 
-// // // // const rows = await fetchTOFU(
-// // // //   propertyId,
-// // // //   start,
-// // // //   end,
-// // // //   modelList,
-// // // //   "TOFU"
-// // // // )
-
-// // // // const totals: Record<string, number> = {}
-
-// // // // for (const row of rows) {
-
-// // // //   const rawModel =
-// // // //     row.dimensionValues?.[0]?.value
-
-// // // //   const users =
-// // // //     Number(row.metricValues?.[0]?.value || 0)
-
-// // // //   if (!rawModel) continue
-
-// // // //   const model = normalize(rawModel)
-
-// // // //   totals[model] =
-// // // //     (totals[model] || 0) + users
-// // // // }
-
-// // // // const grandTotal =
-// // // //   Object.values(totals)
-// // // //     .reduce((a, b) => a + b, 0) || 1
-
-// // // // let data =
-// // // //   Object.entries(totals).map(
-// // // //     ([model, users]) => {
-
-// // // //       const share =
-// // // //         (users / grandTotal) * 100
-
-// // // //       return {
-// // // //         model,
-// // // //         searchShare:
-// // // //           Number(share.toFixed(2)),
-// // // //         trafficShare:
-// // // //           Number(share.toFixed(2)),
-// // // //         pageViewsShare:
-// // // //           Number(share.toFixed(2))
-// // // //       }
+// // // //     if (!modelList.length) {
+// // // //       return NextResponse.json({
+// // // //         success: true,
+// // // //         data: []
+// // // //       })
 // // // //     }
-// // // //   )
 
-// // // // /* ----------------------------- */
-// // // // /* SORT MODELS BY SHARE */
-// // // // /* ----------------------------- */
+// // // //     /* ---------------- FETCH GA DATA ---------------- */
 
-// // // // data = data.sort(
-// // // //   (a, b) =>
-// // // //     b.trafficShare - a.trafficShare
-// // // // )
+// // // //     const rows = await fetchTOFU(
+// // // //       propertyId,
+// // // //       start,
+// // // //       end,
+// // // //       modelList,
+// // // //       "TOFU"
+// // // //     )
 
-// // // // /* ----------------------------- */
-// // // // /* LIMIT TO TOP 20 + OTHERS */
-// // // // /* ----------------------------- */
+// // // //     const totals: Record<string, number> = {}
 
-// // // // const TOP_LIMIT = 20
+// // // //     for (const row of rows) {
 
-// // // // const topModels =
-// // // //   data.slice(0, TOP_LIMIT)
+// // // //       const rawModel =
+// // // //         row.dimensionValues?.[0]?.value
 
-// // // // const remaining =
-// // // //   data.slice(TOP_LIMIT)
+// // // //       const users =
+// // // //         Number(row.metricValues?.[0]?.value || 0)
 
-// // // // if (remaining.length) {
+// // // //       if (!rawModel) continue
 
-// // // //   const others = {
+// // // //       const model = normalize(rawModel)
 
-// // // //     model: "others",
+// // // //       totals[model] =
+// // // //         (totals[model] || 0) + users
+// // // //     }
 
-// // // //     searchShare:
-// // // //       Number(
-// // // //         remaining
-// // // //           .reduce(
-// // // //             (sum, m) =>
-// // // //               sum + m.searchShare,
-// // // //             0
-// // // //           )
-// // // //           .toFixed(2)
-// // // //       ),
+// // // //     const grandTotal =
+// // // //       Object.values(totals)
+// // // //         .reduce((a, b) => a + b, 0) || 1
 
-// // // //     trafficShare:
-// // // //       Number(
-// // // //         remaining
-// // // //           .reduce(
-// // // //             (sum, m) =>
-// // // //               sum + m.trafficShare,
-// // // //             0
-// // // //           )
-// // // //           .toFixed(2)
-// // // //       ),
+// // // //     let data =
+// // // //       Object.entries(totals).map(
+// // // //         ([model, users]) => {
 
-// // // //     pageViewsShare:
-// // // //       Number(
-// // // //         remaining
-// // // //           .reduce(
-// // // //             (sum, m) =>
-// // // //               sum + m.pageViewsShare,
-// // // //             0
-// // // //           )
-// // // //           .toFixed(2)
+// // // //           const share =
+// // // //             (users / grandTotal) * 100
+
+// // // //           return {
+// // // //             model,
+// // // //             searchShare:
+// // // //               Number(share.toFixed(2)),
+// // // //             trafficShare:
+// // // //               Number(share.toFixed(2)),
+// // // //             pageViewsShare:
+// // // //               Number(share.toFixed(2))
+// // // //           }
+// // // //         }
 // // // //       )
+
+// // // //     /* ---------------- SORT MODELS BY SHARE ---------------- */
+
+// // // //     data = data.sort(
+// // // //       (a, b) =>
+// // // //         b.trafficShare - a.trafficShare
+// // // //     )
+
+// // // //     /* ---------------- LIMIT TO TOP 20 + OTHERS ---------------- */
+
+// // // //     const TOP_LIMIT = 20
+
+// // // //     const topModels =
+// // // //       data.slice(0, TOP_LIMIT)
+
+// // // //     const remaining =
+// // // //       data.slice(TOP_LIMIT)
+
+// // // //     if (remaining.length) {
+
+// // // //       const others = {
+
+// // // //         model: "others",
+
+// // // //         searchShare:
+// // // //           Number(
+// // // //             remaining
+// // // //               .reduce(
+// // // //                 (sum, m) =>
+// // // //                   sum + m.searchShare,
+// // // //                 0
+// // // //               )
+// // // //               .toFixed(2)
+// // // //           ),
+
+// // // //         trafficShare:
+// // // //           Number(
+// // // //             remaining
+// // // //               .reduce(
+// // // //                 (sum, m) =>
+// // // //                   sum + m.trafficShare,
+// // // //                 0
+// // // //               )
+// // // //               .toFixed(2)
+// // // //           ),
+
+// // // //         pageViewsShare:
+// // // //           Number(
+// // // //             remaining
+// // // //               .reduce(
+// // // //                 (sum, m) =>
+// // // //                   sum + m.pageViewsShare,
+// // // //                 0
+// // // //               )
+// // // //               .toFixed(2)
+// // // //           )
+
+// // // //       }
+
+// // // //       topModels.push(others)
+// // // //     }
+
+// // // //     return NextResponse.json({
+// // // //       success: true,
+// // // //       data: topModels
+// // // //     })
+
+// // // //   } catch (error) {
+
+// // // //     console.error(
+// // // //       "Traffic share error",
+// // // //       error
+// // // //     )
+
+// // // //     return NextResponse.json({
+// // // //       success: false,
+// // // //       data: []
+// // // //     })
 
 // // // //   }
 
-// // // //   topModels.push(others)
 // // // // }
-
-// // // // return NextResponse.json({
-// // // //   success: true,
-// // // //   data: topModels
-// // // // })
-
-
-// // // // } catch (error) {
-
-
-// // // // console.error(
-// // // //   "Traffic share error",
-// // // //   error
-// // // // )
-
-// // // // return NextResponse.json({
-// // // //   success: false,
-// // // //   data: []
-// // // // })
-
-// // // // }
-
-// // // // }
-
-
-
-
-
-
-
-
-
-
 
 
 // // // import { NextRequest, NextResponse } from "next/server"
@@ -193,15 +360,13 @@
 // // //     const end = searchParams.get("end") || "today"
 // // //     const models = searchParams.get("models") || ""
 
-// // //     const modelList = models.split(",").filter(Boolean)
+// // //     let modelList = models.split(",").filter(Boolean)
 
-// // //     /* ---------------- NO MODEL SELECTED ---------------- */
+// // //     /* ---------------- FIX: HANDLE EMPTY MODEL SELECTION ---------------- */
 
+// // //     // If no models selected, send wildcard so GA query still runs
 // // //     if (!modelList.length) {
-// // //       return NextResponse.json({
-// // //         success: true,
-// // //         data: []
-// // //       })
+// // //       modelList = ["all"]
 // // //     }
 
 // // //     /* ---------------- FETCH GA DATA ---------------- */
@@ -338,6 +503,8 @@
 // // // }
 
 
+
+
 // // import { NextRequest, NextResponse } from "next/server"
 // // import { fetchTOFU } from "@/services/ga4Service"
 
@@ -362,14 +529,15 @@
 
 // //     let modelList = models.split(",").filter(Boolean)
 
-// //     /* ---------------- FIX: HANDLE EMPTY MODEL SELECTION ---------------- */
+// //     /* ---------------- HANDLE EMPTY MODEL SELECTION ---------------- */
 
-// //     // If no models selected, send wildcard so GA query still runs
 // //     if (!modelList.length) {
 // //       modelList = ["all"]
 // //     }
 
-// //     /* ---------------- FETCH GA DATA ---------------- */
+// //     const allowedModels = modelList.map(m => normalize(m))
+
+// //     /* ---------------- FETCH CURRENT PERIOD ---------------- */
 
 // //     const rows = await fetchTOFU(
 // //       propertyId,
@@ -379,7 +547,23 @@
 // //       "TOFU"
 // //     )
 
+// //     /* ---------------- FETCH PREVIOUS PERIOD ---------------- */
+
+// //     const prevStart = "60daysAgo"
+// //     const prevEnd = "31daysAgo"
+
+// //     const prevRows = await fetchTOFU(
+// //       propertyId,
+// //       prevStart,
+// //       prevEnd,
+// //       modelList,
+// //       "TOFU"
+// //     )
+
 // //     const totals: Record<string, number> = {}
+// //     const prevTotals: Record<string, number> = {}
+
+// //     /* ---------------- CURRENT PERIOD AGGREGATION ---------------- */
 
 // //     for (const row of rows) {
 
@@ -393,13 +577,47 @@
 
 // //       const model = normalize(rawModel)
 
+// //       if (
+// //         allowedModels[0] !== "all" &&
+// //         !allowedModels.includes(model)
+// //       ) continue
+
 // //       totals[model] =
 // //         (totals[model] || 0) + users
+// //     }
+
+// //     /* ---------------- PREVIOUS PERIOD AGGREGATION ---------------- */
+
+// //     for (const row of prevRows) {
+
+// //       const rawModel =
+// //         row.dimensionValues?.[0]?.value
+
+// //       const users =
+// //         Number(row.metricValues?.[0]?.value || 0)
+
+// //       if (!rawModel) continue
+
+// //       const model = normalize(rawModel)
+
+// //       if (
+// //         allowedModels[0] !== "all" &&
+// //         !allowedModels.includes(model)
+// //       ) continue
+
+// //       prevTotals[model] =
+// //         (prevTotals[model] || 0) + users
 // //     }
 
 // //     const grandTotal =
 // //       Object.values(totals)
 // //         .reduce((a, b) => a + b, 0) || 1
+
+// //     const prevGrandTotal =
+// //       Object.values(prevTotals)
+// //         .reduce((a, b) => a + b, 0) || 1
+
+// //     /* ---------------- BUILD SHARE DATA ---------------- */
 
 // //     let data =
 // //       Object.entries(totals).map(
@@ -408,26 +626,48 @@
 // //           const share =
 // //             (users / grandTotal) * 100
 
+// //           const prevUsers =
+// //             prevTotals[model] || 0
+
+// //           const prevShare =
+// //             (prevUsers / prevGrandTotal) * 100
+
+// //           const change =
+// //             share - prevShare
+
+// //           let trend: "up" | "down" | "flat" = "flat"
+
+// //           if (change > 0.5) trend = "up"
+// //           else if (change < -0.5) trend = "down"
+
 // //           return {
 // //             model,
+
 // //             searchShare:
 // //               Number(share.toFixed(2)),
+
 // //             trafficShare:
 // //               Number(share.toFixed(2)),
+
 // //             pageViewsShare:
-// //               Number(share.toFixed(2))
+// //               Number(share.toFixed(2)),
+
+// //             shareChange:
+// //               Number(change.toFixed(2)),
+
+// //             trend
 // //           }
 // //         }
 // //       )
 
-// //     /* ---------------- SORT MODELS BY SHARE ---------------- */
+// //     /* ---------------- SORT MODELS ---------------- */
 
 // //     data = data.sort(
 // //       (a, b) =>
 // //         b.trafficShare - a.trafficShare
 // //     )
 
-// //     /* ---------------- LIMIT TO TOP 20 + OTHERS ---------------- */
+// //     /* ---------------- LIMIT TO TOP 20 ---------------- */
 
 // //     const TOP_LIMIT = 20
 
@@ -474,8 +714,20 @@
 // //                 0
 // //               )
 // //               .toFixed(2)
-// //           )
+// //           ),
 
+// //         shareChange:
+// //           Number(
+// //             remaining
+// //               .reduce(
+// //                 (sum, m) =>
+// //                   sum + m.shareChange,
+// //                 0
+// //               )
+// //               .toFixed(2)
+// //           ),
+
+// //         trend: "flat"
 // //       }
 
 // //       topModels.push(others)
@@ -505,8 +757,14 @@
 
 
 
+
+
+
+
+
+
 // import { NextRequest, NextResponse } from "next/server"
-// import { fetchTOFU } from "@/services/ga4Service"
+// import { fetchTraffic } from "@/services/ga4Service"
 
 // function normalize(name: string) {
 //   return name
@@ -529,95 +787,56 @@
 
 //     let modelList = models.split(",").filter(Boolean)
 
-//     /* ---------------- HANDLE EMPTY MODEL SELECTION ---------------- */
+//     /* ---------- HANDLE EMPTY MODEL SELECTION ---------- */
 
 //     if (!modelList.length) {
 //       modelList = ["all"]
 //     }
 
-//     const allowedModels = modelList.map(m => normalize(m))
+//     const allowedModels =
+//       modelList.map(m => normalize(m))
 
-//     /* ---------------- FETCH CURRENT PERIOD ---------------- */
+//     /* ---------- FETCH GA DATA ---------- */
 
-//     const rows = await fetchTOFU(
+//     const rows = await fetchTraffic(
 //       propertyId,
 //       start,
-//       end,
-//       modelList,
-//       "TOFU"
-//     )
-
-//     /* ---------------- FETCH PREVIOUS PERIOD ---------------- */
-
-//     const prevStart = "60daysAgo"
-//     const prevEnd = "31daysAgo"
-
-//     const prevRows = await fetchTOFU(
-//       propertyId,
-//       prevStart,
-//       prevEnd,
-//       modelList,
-//       "TOFU"
+//       end
 //     )
 
 //     const totals: Record<string, number> = {}
-//     const prevTotals: Record<string, number> = {}
 
-//     /* ---------------- CURRENT PERIOD AGGREGATION ---------------- */
+//     /* ---------- STRICT FILTERING ---------- */
 
 //     for (const row of rows) {
 
 //       const rawModel =
-//         row.dimensionValues?.[0]?.value
+//         row.dimensionValues?.[1]?.value
 
-//       const users =
+//       const pageViews =
 //         Number(row.metricValues?.[0]?.value || 0)
 
 //       if (!rawModel) continue
 
-//       const model = normalize(rawModel)
+//       const model =
+//         normalize(rawModel)
+
+//       /* IMPORTANT FIX */
 
 //       if (
 //         allowedModels[0] !== "all" &&
 //         !allowedModels.includes(model)
-//       ) continue
+//       ) {
+//         continue
+//       }
 
 //       totals[model] =
-//         (totals[model] || 0) + users
-//     }
-
-//     /* ---------------- PREVIOUS PERIOD AGGREGATION ---------------- */
-
-//     for (const row of prevRows) {
-
-//       const rawModel =
-//         row.dimensionValues?.[0]?.value
-
-//       const users =
-//         Number(row.metricValues?.[0]?.value || 0)
-
-//       if (!rawModel) continue
-
-//       const model = normalize(rawModel)
-
-//       if (
-//         allowedModels[0] !== "all" &&
-//         !allowedModels.includes(model)
-//       ) continue
-
-//       prevTotals[model] =
-//         (prevTotals[model] || 0) + users
+//         (totals[model] || 0) + pageViews
 //     }
 
 //     const grandTotal =
 //       Object.values(totals)
 //         .reduce((a, b) => a + b, 0) || 1
-
-//     const prevGrandTotal =
-//       Object.values(prevTotals)
-//         .reduce((a, b) => a + b, 0) || 1
-
-//     /* ---------------- BUILD SHARE DATA ---------------- */
 
 //     let data =
 //       Object.entries(totals).map(
@@ -626,48 +845,26 @@
 //           const share =
 //             (users / grandTotal) * 100
 
-//           const prevUsers =
-//             prevTotals[model] || 0
-
-//           const prevShare =
-//             (prevUsers / prevGrandTotal) * 100
-
-//           const change =
-//             share - prevShare
-
-//           let trend: "up" | "down" | "flat" = "flat"
-
-//           if (change > 0.5) trend = "up"
-//           else if (change < -0.5) trend = "down"
-
 //           return {
 //             model,
-
 //             searchShare:
 //               Number(share.toFixed(2)),
-
 //             trafficShare:
 //               Number(share.toFixed(2)),
-
 //             pageViewsShare:
-//               Number(share.toFixed(2)),
-
-//             shareChange:
-//               Number(change.toFixed(2)),
-
-//             trend
+//               Number(share.toFixed(2))
 //           }
 //         }
 //       )
 
-//     /* ---------------- SORT MODELS ---------------- */
+//     /* ---------- SORT ---------- */
 
 //     data = data.sort(
 //       (a, b) =>
 //         b.trafficShare - a.trafficShare
 //     )
 
-//     /* ---------------- LIMIT TO TOP 20 ---------------- */
+//     /* ---------- LIMIT TOP 20 ---------- */
 
 //     const TOP_LIMIT = 20
 
@@ -685,49 +882,30 @@
 
 //         searchShare:
 //           Number(
-//             remaining
-//               .reduce(
-//                 (sum, m) =>
-//                   sum + m.searchShare,
-//                 0
-//               )
-//               .toFixed(2)
+//             remaining.reduce(
+//               (sum, m) =>
+//                 sum + m.searchShare,
+//               0
+//             ).toFixed(2)
 //           ),
 
 //         trafficShare:
 //           Number(
-//             remaining
-//               .reduce(
-//                 (sum, m) =>
-//                   sum + m.trafficShare,
-//                 0
-//               )
-//               .toFixed(2)
+//             remaining.reduce(
+//               (sum, m) =>
+//                 sum + m.trafficShare,
+//               0
+//             ).toFixed(2)
 //           ),
 
 //         pageViewsShare:
 //           Number(
-//             remaining
-//               .reduce(
-//                 (sum, m) =>
-//                   sum + m.pageViewsShare,
-//                 0
-//               )
-//               .toFixed(2)
-//           ),
-
-//         shareChange:
-//           Number(
-//             remaining
-//               .reduce(
-//                 (sum, m) =>
-//                   sum + m.shareChange,
-//                 0
-//               )
-//               .toFixed(2)
-//           ),
-
-//         trend: "flat"
+//             remaining.reduce(
+//               (sum, m) =>
+//                 sum + m.pageViewsShare,
+//               0
+//             ).toFixed(2)
+//           )
 //       }
 
 //       topModels.push(others)
@@ -761,10 +939,8 @@
 
 
 
-
-
 import { NextRequest, NextResponse } from "next/server"
-import { fetchTOFU } from "@/services/ga4Service"
+import { fetchTraffic } from "@/services/ga4Service"
 
 function normalize(name: string) {
   return name
@@ -781,13 +957,11 @@ export async function GET(req: NextRequest) {
 
     const { searchParams } = new URL(req.url)
 
-    const start = searchParams.get("start") || "30daysAgo"
+    const start = searchParams.get("start") || "180daysAgo"
     const end = searchParams.get("end") || "today"
     const models = searchParams.get("models") || ""
 
     let modelList = models.split(",").filter(Boolean)
-
-    /* ---------- HANDLE EMPTY MODEL SELECTION ---------- */
 
     if (!modelList.length) {
       modelList = ["all"]
@@ -796,34 +970,34 @@ export async function GET(req: NextRequest) {
     const allowedModels =
       modelList.map(m => normalize(m))
 
-    /* ---------- FETCH GA DATA ---------- */
+    /* ----------------------------- */
+    /* FETCH GA DATA */
+    /* ----------------------------- */
 
-    const rows = await fetchTOFU(
+    const rows = await fetchTraffic(
       propertyId,
       start,
-      end,
-      modelList,
-      "TOFU"
+      end
     )
 
-    const totals: Record<string, number> = {}
+    const totals: Record<string, {
+      users: number
+      pageViews: number
+    }> = {}
 
-    /* ---------- STRICT FILTERING ---------- */
+    /* ----------------------------- */
+    /* PROCESS ROWS */
+    /* ----------------------------- */
 
     for (const row of rows) {
 
       const rawModel =
-        row.dimensionValues?.[0]?.value
-
-      const users =
-        Number(row.metricValues?.[0]?.value || 0)
+        row.dimensionValues?.[1]?.value
 
       if (!rawModel) continue
 
       const model =
         normalize(rawModel)
-
-      /* IMPORTANT FIX */
 
       if (
         allowedModels[0] !== "all" &&
@@ -832,41 +1006,76 @@ export async function GET(req: NextRequest) {
         continue
       }
 
-      totals[model] =
-        (totals[model] || 0) + users
+      const users =
+        Number(row.metricValues?.[0]?.value || 0)
+
+      const pageViews =
+        Number(row.metricValues?.[1]?.value || 0)
+
+      if (!totals[model]) {
+        totals[model] = {
+          users: 0,
+          pageViews: 0
+        }
+      }
+
+      totals[model].users += users
+      totals[model].pageViews += pageViews
     }
 
-    const grandTotal =
+    /* ----------------------------- */
+    /* TOTALS */
+    /* ----------------------------- */
+
+    const totalUsers =
       Object.values(totals)
-        .reduce((a, b) => a + b, 0) || 1
+        .reduce((sum, m) => sum + m.users, 0) || 1
+
+    const totalPageViews =
+      Object.values(totals)
+        .reduce((sum, m) => sum + m.pageViews, 0) || 1
+
+    /* ----------------------------- */
+    /* BUILD SHARE DATA */
+    /* ----------------------------- */
 
     let data =
       Object.entries(totals).map(
-        ([model, users]) => {
+        ([model, values]) => {
 
-          const share =
-            (users / grandTotal) * 100
+          const trafficShare =
+            (values.users / totalUsers) * 100
+
+          const pageViewsShare =
+            (values.pageViews / totalPageViews) * 100
 
           return {
+
             model,
-            searchShare:
-              Number(share.toFixed(2)),
+
             trafficShare:
-              Number(share.toFixed(2)),
+              Number(trafficShare.toFixed(2)),
+
             pageViewsShare:
-              Number(share.toFixed(2))
+              Number(pageViewsShare.toFixed(2))
+
           }
         }
       )
 
-    /* ---------- SORT ---------- */
+    /* ----------------------------- */
+    /* SORT */
+    /* ----------------------------- */
 
-    data = data.sort(
-      (a, b) =>
-        b.trafficShare - a.trafficShare
-    )
+    data =
+      data.sort(
+        (a, b) =>
+          b.trafficShare - a.trafficShare
+      )
 
-    /* ---------- LIMIT TOP 20 ---------- */
+    /* ----------------------------- */
+    /* TOP 20 + OTHERS */
+    /* ----------------------------- */
 
     const TOP_LIMIT = 20
 
@@ -882,31 +1091,26 @@ export async function GET(req: NextRequest) {
 
         model: "others",
 
-        searchShare:
-          Number(
-            remaining.reduce(
-              (sum, m) =>
-                sum + m.searchShare,
-              0
-            ).toFixed(2)
-          ),
-
         trafficShare:
           Number(
-            remaining.reduce(
-              (sum, m) =>
-                sum + m.trafficShare,
-              0
-            ).toFixed(2)
+            remaining
+              .reduce(
+                (sum, m) =>
+                  sum + m.trafficShare,
+                0
+              )
+              .toFixed(2)
           ),
 
         pageViewsShare:
           Number(
-            remaining.reduce(
-              (sum, m) =>
-                sum + m.pageViewsShare,
-              0
-            ).toFixed(2)
+            remaining
+              .reduce(
+                (sum, m) =>
+                  sum + m.pageViewsShare,
+                0
+              )
+              .toFixed(2)
           )
       }
 

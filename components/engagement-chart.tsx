@@ -594,9 +594,348 @@
 
 
 
+// 'use client'
+
+// import { useEffect, useMemo } from "react"
+
+// import {
+//   LineChart,
+//   Line,
+//   XAxis,
+//   YAxis,
+//   CartesianGrid,
+//   Tooltip,
+//   Legend,
+//   ResponsiveContainer
+// } from "recharts"
+
+// import { registerChart } from "@/lib/ppt/chartRegistry"
+
+// export default function EngagementChart({
+//   data = [],
+//   isLoading = false
+// }: { 
+//   data?: any[]
+//   isLoading?: boolean
+// }) {
+
+//   /* ----------------------------- */
+//   /* FORMAT DATE ONLY ONCE */
+//   /* ----------------------------- */
+
+//   const formatted = useMemo(() => {
+
+//     if (!data?.length) return []
+
+//     return data.map((d: any) => {
+
+//       if (!d.date) return d
+
+//       const date = d.date.toString()
+
+//       return {
+//         ...d,
+//         date: `${date.slice(0,4)}-${date.slice(4,6)}-${date.slice(6,8)}`
+//       }
+
+//     })
+
+//   }, [data])
+
+//   /* ----------------------------- */
+//   /* PPT EXPORT REGISTRATION */
+//   /* ----------------------------- */
+
+//   useEffect(() => {
+
+//     if (!formatted.length) return
+
+//     registerChart({
+//       title: "PV / UU",
+//       labels: formatted.map(d => d.date),
+//       values: formatted.map(d => d.pv_uu)
+//     })
+
+//     registerChart({
+//       title: "Avg Session Duration",
+//       labels: formatted.map(d => d.date),
+//       values: formatted.map(d => d.avg_session_duration)
+//     })
+
+//   }, [formatted])
+
+//   if (isLoading) {
+//     return (
+//       <div className="flex items-center justify-center h-[300px] text-gray-400">
+//         Loading engagement data...
+//       </div>
+//     )
+//   }
+
+//   return (
+
+//     <ResponsiveContainer width="100%" height={320}>
+
+//       <LineChart data={formatted}>
+
+//         <CartesianGrid strokeDasharray="3 3" />
+
+//         <XAxis
+//           dataKey="date"
+//           tick={{ fontSize: 12 }}
+//         />
+
+//         {/* PV/UU axis */}
+//         <YAxis
+//           yAxisId="left"
+//           label={{
+//             value: "PV / UU",
+//             angle: -90,
+//             position: "insideLeft"
+//           }}
+//         />
+
+//         {/* Session duration axis */}
+//         <YAxis
+//           yAxisId="right"
+//           orientation="right"
+//           label={{
+//             value: "Session (min)",
+//             angle: 90,
+//             position: "insideRight"
+//           }}
+//         />
+
+//         <Tooltip />
+
+//         <Legend />
+
+//         <Line
+//           yAxisId="left"
+//           type="monotone"
+//           dataKey="pv_uu"
+//           stroke="#2563eb"
+//           strokeWidth={2}
+//           dot={false}
+//           name="PV/UU"
+//         />
+
+//         <Line
+//           yAxisId="right"
+//           type="monotone"
+//           dataKey="avg_session_duration"
+//           stroke="#16a34a"
+//           strokeWidth={2}
+//           dot={false}
+//           name="Avg Session Duration"
+//         />
+
+//       </LineChart>
+
+//     </ResponsiveContainer>
+
+//   )
+
+// }
+
+
+
+
+// 'use client'
+
+// import { useEffect, useMemo } from "react"
+
+// import {
+//   LineChart,
+//   Line,
+//   XAxis,
+//   YAxis,
+//   CartesianGrid,
+//   Tooltip,
+//   Legend,
+//   ResponsiveContainer
+// } from "recharts"
+
+// import {
+//   Card,
+//   CardHeader,
+//   CardTitle,
+//   CardDescription,
+//   CardContent
+// } from "@/components/ui/card"
+
+// import { registerChart } from "@/lib/ppt/chartRegistry"
+
+// export default function EngagementChart({
+//   data = [],
+//   isLoading = false
+// }: { 
+//   data?: any[]
+//   isLoading?: boolean
+// }) {
+
+//   const formatted = useMemo(() => {
+
+//     if (!data?.length) return []
+
+//     return data.map((d: any) => {
+
+//       if (!d.date) return d
+
+//       const date = d.date.toString()
+
+//       return {
+//         ...d,
+//         date: `${date.slice(0,4)}-${date.slice(4,6)}-${date.slice(6,8)}`
+//       }
+
+//     })
+
+//   }, [data])
+
+//   useEffect(() => {
+
+//     if (!formatted.length) return
+
+//     registerChart({
+//       title: "PV / UU",
+//       labels: formatted.map(d => d.date),
+//       values: formatted.map(d => d.pv_uu)
+//     })
+
+//     registerChart({
+//       title: "Avg Session Duration",
+//       labels: formatted.map(d => d.date),
+//       values: formatted.map(d => d.avg_session_duration)
+//     })
+
+//   }, [formatted])
+
+//   if (isLoading) {
+//     return (
+//       <Card>
+//         <CardHeader>
+//           <CardTitle>Engagement Trend</CardTitle>
+//           <CardDescription>
+//             PV/UU and average session duration
+//           </CardDescription>
+//         </CardHeader>
+//         <CardContent className="flex items-center justify-center h-[320px] text-gray-400">
+//           Loading engagement data...
+//         </CardContent>
+//       </Card>
+//     )
+//   }
+
+//   return (
+
+//     <Card>
+
+//       <CardHeader>
+//         <CardTitle>Engagement Trend</CardTitle>
+//         <CardDescription>
+//           PV/UU and average session duration
+//         </CardDescription>
+//       </CardHeader>
+
+//       <CardContent>
+
+//         <ResponsiveContainer width="100%" height={300}>
+
+//           <LineChart data={formatted}>
+
+//             <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
+
+//             <XAxis
+//               dataKey="date"
+//               tick={{
+//                 fontSize: 12,
+//                 fill: "var(--color-muted-foreground)"
+//               }}
+//             />
+
+//             <YAxis
+//               yAxisId="left"
+//               tick={{ fill: "var(--color-muted-foreground)" }}
+//               label={{
+//                 value: "PV / UU",
+//                 angle: -90,
+//                 position: "insideLeft"
+//               }}
+//             />
+
+//             <YAxis
+//               yAxisId="right"
+//               orientation="right"
+//               tick={{ fill: "var(--color-muted-foreground)" }}
+//               label={{
+//                 value: "Session (min)",
+//                 angle: 90,
+//                 position: "insideRight"
+//               }}
+//             />
+
+//             <Tooltip />
+
+//             <Legend />
+
+//             <Line
+//               yAxisId="left"
+//               type="monotone"
+//               dataKey="pv_uu"
+//               stroke="#2563eb"
+//               strokeWidth={2.5}
+//               dot={false}
+//               name="PV/UU"
+//             />
+
+//             <Line
+//               yAxisId="right"
+//               type="monotone"
+//               dataKey="avg_session_duration"
+//               stroke="#16a34a"
+//               strokeWidth={2.5}
+//               dot={false}
+//               name="Avg Session Duration"
+//             />
+
+//           </LineChart>
+
+//         </ResponsiveContainer>
+
+//       </CardContent>
+
+//     </Card>
+
+//   )
+
+// }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 'use client'
 
-import { useEffect, useMemo } from "react"
+import { useEffect, useMemo, useRef } from "react"
 
 import {
   LineChart,
@@ -609,6 +948,14 @@ import {
   ResponsiveContainer
 } from "recharts"
 
+import {
+  Card,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardContent
+} from "@/components/ui/card"
+
 import { registerChart } from "@/lib/ppt/chartRegistry"
 
 export default function EngagementChart({
@@ -620,7 +967,13 @@ export default function EngagementChart({
 }) {
 
   /* ----------------------------- */
-  /* FORMAT DATE ONLY ONCE */
+  /* PREVENT MULTIPLE REGISTRATIONS */
+  /* ----------------------------- */
+
+  const registered = useRef(false)
+
+  /* ----------------------------- */
+  /* FORMAT DATA */
   /* ----------------------------- */
 
   const formatted = useMemo(() => {
@@ -649,90 +1002,119 @@ export default function EngagementChart({
   useEffect(() => {
 
     if (!formatted.length) return
+    if (registered.current) return
+
+    registered.current = true
 
     registerChart({
       title: "PV / UU",
       labels: formatted.map(d => d.date),
-      values: formatted.map(d => d.pv_uu)
+      values: formatted.map(d => Number(d.pv_uu))
     })
 
     registerChart({
       title: "Avg Session Duration",
       labels: formatted.map(d => d.date),
-      values: formatted.map(d => d.avg_session_duration)
+      values: formatted.map(d => Number(d.avg_session_duration))
     })
 
   }, [formatted])
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-[300px] text-gray-400">
-        Loading engagement data...
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>Engagement Trend</CardTitle>
+          <CardDescription>
+            PV/UU and average session duration
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center h-[320px] text-gray-400">
+          Loading engagement data...
+        </CardContent>
+      </Card>
     )
   }
 
   return (
 
-    <ResponsiveContainer width="100%" height={320}>
+    <Card>
 
-      <LineChart data={formatted}>
+      <CardHeader>
+        <CardTitle>Engagement Trend</CardTitle>
+        <CardDescription>
+          PV/UU and average session duration
+        </CardDescription>
+      </CardHeader>
 
-        <CartesianGrid strokeDasharray="3 3" />
+      <CardContent>
 
-        <XAxis
-          dataKey="date"
-          tick={{ fontSize: 12 }}
-        />
+        <ResponsiveContainer width="100%" height={300}>
 
-        {/* PV/UU axis */}
-        <YAxis
-          yAxisId="left"
-          label={{
-            value: "PV / UU",
-            angle: -90,
-            position: "insideLeft"
-          }}
-        />
+          <LineChart data={formatted}>
 
-        {/* Session duration axis */}
-        <YAxis
-          yAxisId="right"
-          orientation="right"
-          label={{
-            value: "Session (min)",
-            angle: 90,
-            position: "insideRight"
-          }}
-        />
+            <CartesianGrid strokeDasharray="3 3" className="stroke-border" />
 
-        <Tooltip />
+            <XAxis
+              dataKey="date"
+              tick={{
+                fontSize: 12,
+                fill: "var(--color-muted-foreground)"
+              }}
+            />
 
-        <Legend />
+            <YAxis
+              yAxisId="left"
+              tick={{ fill: "var(--color-muted-foreground)" }}
+              label={{
+                value: "PV / UU",
+                angle: -90,
+                position: "insideLeft"
+              }}
+            />
 
-        <Line
-          yAxisId="left"
-          type="monotone"
-          dataKey="pv_uu"
-          stroke="#2563eb"
-          strokeWidth={2}
-          dot={false}
-          name="PV/UU"
-        />
+            <YAxis
+              yAxisId="right"
+              orientation="right"
+              tick={{ fill: "var(--color-muted-foreground)" }}
+              label={{
+                value: "Session (min)",
+                angle: 90,
+                position: "insideRight"
+              }}
+            />
 
-        <Line
-          yAxisId="right"
-          type="monotone"
-          dataKey="avg_session_duration"
-          stroke="#16a34a"
-          strokeWidth={2}
-          dot={false}
-          name="Avg Session Duration"
-        />
+            <Tooltip />
 
-      </LineChart>
+            <Legend />
 
-    </ResponsiveContainer>
+            <Line
+              yAxisId="left"
+              type="monotone"
+              dataKey="pv_uu"
+              stroke="#2563eb"
+              strokeWidth={2.5}
+              dot={false}
+              name="PV/UU"
+            />
+
+            <Line
+              yAxisId="right"
+              type="monotone"
+              dataKey="avg_session_duration"
+              stroke="#16a34a"
+              strokeWidth={2.5}
+              dot={false}
+              name="Avg Session Duration"
+            />
+
+          </LineChart>
+
+        </ResponsiveContainer>
+
+      </CardContent>
+
+    </Card>
 
   )
 

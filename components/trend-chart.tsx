@@ -1,3 +1,176 @@
+// // // // // 'use client'
+
+// // // // // import {
+// // // // // LineChart,
+// // // // // Line,
+// // // // // XAxis,
+// // // // // YAxis,
+// // // // // CartesianGrid,
+// // // // // Tooltip,
+// // // // // Legend,
+// // // // // ResponsiveContainer,
+// // // // // } from 'recharts'
+
+// // // // // import {
+// // // // // Card,
+// // // // // CardContent,
+// // // // // CardHeader,
+// // // // // CardTitle,
+// // // // // CardDescription,
+// // // // // } from '@/components/ui/card'
+
+// // // // // import { Skeleton } from '@/components/ui/skeleton'
+
+// // // // // const CHART_COLORS = [
+// // // // // '#2563eb',
+// // // // // '#dc2626',
+// // // // // '#16a34a',
+// // // // // '#d97706',
+// // // // // '#7c3aed',
+// // // // // '#0891b2',
+// // // // // '#db2777',
+// // // // // ]
+
+// // // // // function formatLabel(key: string): string {
+// // // // // return key
+// // // // // .replace(/_/g, ' ')
+// // // // // .replace(/\b\w/g, (c) => c.toUpperCase())
+// // // // // }
+
+// // // // // function formatDateTick(val: string): string {
+// // // // // const d = new Date(val + 'T00:00:00')
+// // // // // return d.toLocaleDateString('en-US', {
+// // // // // month: 'short',
+// // // // // day: 'numeric',
+// // // // // })
+// // // // // }
+
+// // // // // function formatDateTooltip(val: string): string {
+// // // // // const d = new Date(val + 'T00:00:00')
+// // // // // return d.toLocaleDateString('en-US', {
+// // // // // weekday: 'short',
+// // // // // month: 'short',
+// // // // // day: 'numeric',
+// // // // // })
+// // // // // }
+
+// // // // // interface TrendChartProps {
+// // // // // data: Record<string, string | number>[] | undefined
+// // // // // isLoading: boolean
+// // // // // }
+
+// // // // // export function TrendChart({ data, isLoading }: TrendChartProps) {
+
+// // // // // if (isLoading) {
+// // // // // return ( <Card> <CardHeader> <Skeleton className="h-5 w-48" /> <Skeleton className="h-4 w-64" /> </CardHeader> <CardContent> <Skeleton className="h-[350px] w-full" /> </CardContent> </Card>
+// // // // // )
+// // // // // }
+
+// // // // // if (!data || data.length === 0) {
+// // // // // return ( <Card> <CardHeader> <CardTitle>Model vs Competitor Performance</CardTitle> <CardDescription>
+// // // // // Daily traffic comparison across competing models </CardDescription> </CardHeader>
+
+// // // // // ```
+// // // // //     <CardContent>
+// // // // //       <div className="flex h-[350px] items-center justify-center text-muted-foreground">
+// // // // //         No trend data available
+// // // // //       </div>
+// // // // //     </CardContent>
+// // // // //   </Card>
+// // // // // )
+
+
+// // // // // }
+
+// // // // // const models = Object.keys(data[0]).filter((k) => k !== 'date')
+
+// // // // // return ( <Card>
+
+
+// // // // //   <CardHeader>
+// // // // //     <CardTitle>Model vs Competitor Performance</CardTitle>
+// // // // //     <CardDescription>
+// // // // //       Daily traffic comparison across competing models
+// // // // //     </CardDescription>
+// // // // //   </CardHeader>
+
+// // // // //   <CardContent>
+// // // // //     <ResponsiveContainer width="100%" height={350}>
+
+// // // // //       <LineChart
+// // // // //         data={data}
+// // // // //         margin={{ top: 10, right: 25, left: 10, bottom: 10 }}
+// // // // //       >
+
+// // // // //         {/* cleaner grid */}
+// // // // //         <CartesianGrid
+// // // // //           strokeDasharray="2 4"
+// // // // //           vertical={false}
+// // // // //           opacity={0.3}
+// // // // //         />
+
+// // // // //         <XAxis
+// // // // //           dataKey="date"
+// // // // //           tick={{ fontSize: 12 }}
+// // // // //           tickFormatter={formatDateTick}
+// // // // //           tickLine={false}
+// // // // //         />
+
+// // // // //         <YAxis
+// // // // //           tick={{ fontSize: 12 }}
+// // // // //           width={60}
+// // // // //           tickFormatter={(v) => Number(v).toLocaleString()}
+// // // // //           tickLine={false}
+// // // // //           axisLine={false}
+// // // // //         />
+
+// // // // //         <Tooltip
+// // // // //           formatter={(value, name) => [
+// // // // //             Number(value).toLocaleString(),
+// // // // //             formatLabel(String(name)),
+// // // // //           ]}
+// // // // //           labelFormatter={formatDateTooltip}
+// // // // //           contentStyle={{
+// // // // //             borderRadius: 8,
+// // // // //             border: '1px solid #e5e7eb',
+// // // // //           }}
+// // // // //         />
+
+// // // // //         <Legend
+// // // // //           formatter={(value) => formatLabel(String(value))}
+// // // // //         />
+
+// // // // //         {models.map((model, i) => (
+// // // // //           <Line
+// // // // //             key={model}
+// // // // //             type="monotone"
+// // // // //             dataKey={model}
+// // // // //             name={model}
+// // // // //             stroke={CHART_COLORS[i % CHART_COLORS.length]}
+// // // // //             strokeWidth={3}
+
+// // // // //             /* IMPORTANT FIXES */
+
+// // // // //             dot={false}
+// // // // //             activeDot={{ r: 5 }}
+// // // // //             connectNulls
+// // // // //             isAnimationActive={false}
+// // // // //           />
+// // // // //         ))}
+
+// // // // //       </LineChart>
+
+// // // // //     </ResponsiveContainer>
+// // // // //   </CardContent>
+
+// // // // // </Card>
+
+// // // // // )
+// // // // // }
+
+
+
+
 // // // // 'use client'
 
 // // // // import {
@@ -70,283 +243,337 @@
 // // // // return ( <Card> <CardHeader> <CardTitle>Model vs Competitor Performance</CardTitle> <CardDescription>
 // // // // Daily traffic comparison across competing models </CardDescription> </CardHeader>
 
-// // // // ```
-// // // //     <CardContent>
-// // // //       <div className="flex h-[350px] items-center justify-center text-muted-foreground">
-// // // //         No trend data available
-// // // //       </div>
-// // // //     </CardContent>
-// // // //   </Card>
-// // // // )
-
+// // // // <CardContent>
+// // // //   <div className="flex h-[350px] items-center justify-center text-muted-foreground">
+// // // //     No trend data available
+// // // //   </div>
+// // // // </CardContent>
+// // // // </Card> )
 
 // // // // }
 
-// // // // const models = Object.keys(data[0]).filter((k) => k !== 'date')
+// // // // /* ----------------------------- /
+// // // // / FIX: COLLAPSE VARIANT MODELS /
+// // // // / ----------------------------- */
+
+// // // // const rawModels = Object.keys(data[0]).filter((k) => k !== 'date')
+
+// // // // const models = Array.from(
+// // // // new Set(
+// // // // rawModels.map((m) =>
+// // // // m
+// // // // .replace(/_ev$/i,'')
+// // // // .replace(/_roxx$/i,'')
+// // // // .replace(/_racer$/i,'')
+// // // // .replace(/_e$/i,'')
+// // // // )
+// // // // )
+// // // // )
 
 // // // // return ( <Card>
 
+// // // // <CardHeader> <CardTitle>Model vs Competitor Performance</CardTitle> <CardDescription> Daily traffic comparison across competing models </CardDescription> </CardHeader> <CardContent> <ResponsiveContainer width="100%" height={350}>
+// // // //   <LineChart
+// // // //     data={data}
+// // // //     margin={{ top: 10, right: 25, left: 10, bottom: 10 }}
+// // // //   >
 
-// // // //   <CardHeader>
-// // // //     <CardTitle>Model vs Competitor Performance</CardTitle>
-// // // //     <CardDescription>
-// // // //       Daily traffic comparison across competing models
-// // // //     </CardDescription>
-// // // //   </CardHeader>
+// // // //     {/* cleaner grid */}
+// // // //     <CartesianGrid
+// // // // //       strokeDasharray="2 4"
+// // // // //       vertical={false}
+// // // // //       opacity={0.3}
+// // // // //     />
 
-// // // //   <CardContent>
-// // // //     <ResponsiveContainer width="100%" height={350}>
+// // // // //     <XAxis
+// // // // //       dataKey="date"
+// // // // //       tick={{ fontSize: 12 }}
+// // // // //       tickFormatter={formatDateTick}
+// // // // //       tickLine={false}
+// // // // //     />
 
-// // // //       <LineChart
-// // // //         data={data}
-// // // //         margin={{ top: 10, right: 25, left: 10, bottom: 10 }}
-// // // //       >
+// // // // //     <YAxis
+// // // // //       tick={{ fontSize: 12 }}
+// // // // //       width={60}
+// // // // //       tickFormatter={(v) => Number(v).toLocaleString()}
+// // // // //       tickLine={false}
+// // // // //       axisLine={false}
+// // // // //     />
 
-// // // //         {/* cleaner grid */}
-// // // //         <CartesianGrid
-// // // //           strokeDasharray="2 4"
-// // // //           vertical={false}
-// // // //           opacity={0.3}
-// // // //         />
+// // // // //     <Tooltip
+// // // // //       formatter={(value, name) => [
+// // // // //         Number(value).toLocaleString(),
+// // // // //         formatLabel(String(name)),
+// // // // //       ]}
+// // // // //       labelFormatter={formatDateTooltip}
+// // // // //       contentStyle={{
+// // // // //         borderRadius: 8,
+// // // // //         border: '1px solid #e5e7eb',
+// // // // //       }}
+// // // // //     />
 
-// // // //         <XAxis
-// // // //           dataKey="date"
-// // // //           tick={{ fontSize: 12 }}
-// // // //           tickFormatter={formatDateTick}
-// // // //           tickLine={false}
-// // // //         />
+// // // // //     <Legend
+// // // // //       formatter={(value) => formatLabel(String(value))}
+// // // // //     />
 
-// // // //         <YAxis
-// // // //           tick={{ fontSize: 12 }}
-// // // //           width={60}
-// // // //           tickFormatter={(v) => Number(v).toLocaleString()}
-// // // //           tickLine={false}
-// // // //           axisLine={false}
-// // // //         />
+// // // // //     {models.map((model, i) => (
+// // // // //       <Line
+// // // // //         key={model}
+// // // // //         type="monotone"
+// // // // //         dataKey={model}
+// // // // //         name={model}
+// // // // //         stroke={CHART_COLORS[i % CHART_COLORS.length]}
+// // // // //         strokeWidth={3}
 
-// // // //         <Tooltip
-// // // //           formatter={(value, name) => [
-// // // //             Number(value).toLocaleString(),
-// // // //             formatLabel(String(name)),
-// // // //           ]}
-// // // //           labelFormatter={formatDateTooltip}
-// // // //           contentStyle={{
-// // // //             borderRadius: 8,
-// // // //             border: '1px solid #e5e7eb',
-// // // //           }}
-// // // //         />
+// // // // //         /* IMPORTANT FIXES */
 
-// // // //         <Legend
-// // // //           formatter={(value) => formatLabel(String(value))}
-// // // //         />
+// // // // //         dot={false}
+// // // // //         activeDot={{ r: 5 }}
+// // // // //         connectNulls
+// // // // //         isAnimationActive={false}
+// // // // //       />
+// // // // //     ))}
 
-// // // //         {models.map((model, i) => (
-// // // //           <Line
-// // // //             key={model}
-// // // //             type="monotone"
-// // // //             dataKey={model}
-// // // //             name={model}
-// // // //             stroke={CHART_COLORS[i % CHART_COLORS.length]}
-// // // //             strokeWidth={3}
+// // // // //   </LineChart>
 
-// // // //             /* IMPORTANT FIXES */
+// // // // // </ResponsiveContainer>
+// // // // // </CardContent> </Card>
 
-// // // //             dot={false}
-// // // //             activeDot={{ r: 5 }}
-// // // //             connectNulls
-// // // //             isAnimationActive={false}
-// // // //           />
-// // // //         ))}
+// // // // // )
+// // // // // }
 
-// // // //       </LineChart>
 
-// // // //     </ResponsiveContainer>
-// // // //   </CardContent>
 
+
+
+
+
+
+
+// // // // 'use client'
+
+// // // // import { useEffect } from 'react'
+
+// // // // import {
+// // // // LineChart,
+// // // // Line,
+// // // // XAxis,
+// // // // YAxis,
+// // // // CartesianGrid,
+// // // // Tooltip,
+// // // // Legend,
+// // // // ResponsiveContainer,
+// // // // } from 'recharts'
+
+// // // // import {
+// // // // Card,
+// // // // CardContent,
+// // // // CardHeader,
+// // // // CardTitle,
+// // // // CardDescription,
+// // // // } from '@/components/ui/card'
+
+// // // // import { Skeleton } from '@/components/ui/skeleton'
+
+// // // // import { registerTrendChart } from '@/lib/ppt/chartRegistry'
+
+// // // // const CHART_COLORS = [
+// // // // '#2563eb',
+// // // // '#dc2626',
+// // // // '#16a34a',
+// // // // '#d97706',
+// // // // '#7c3aed',
+// // // // '#0891b2',
+// // // // '#db2777',
+// // // // ]
+
+// // // // function formatLabel(key: string): string {
+// // // // return key
+// // // // .replace(/_/g, ' ')
+// // // // .replace(/\b\w/g, (c) => c.toUpperCase())
+// // // // }
+
+// // // // function formatDateTick(val: string): string {
+// // // // const d = new Date(val + 'T00:00:00')
+// // // // return d.toLocaleDateString('en-US', {
+// // // // month: 'short',
+// // // // day: 'numeric',
+// // // // })
+// // // // }
+
+// // // // function formatDateTooltip(val: string): string {
+// // // // const d = new Date(val + 'T00:00:00')
+// // // // return d.toLocaleDateString('en-US', {
+// // // // weekday: 'short',
+// // // // month: 'short',
+// // // // day: 'numeric',
+// // // // })
+// // // // }
+
+// // // // interface TrendChartProps {
+// // // // data: Record<string, string | number>[] | undefined
+// // // // isLoading: boolean
+// // // // }
+
+// // // // export function TrendChart({ data, isLoading }: TrendChartProps) {
+    
+
+// // // // if (isLoading) {
+// // // // return (
+// // // // <Card>
+// // // // <CardHeader>
+// // // // <Skeleton className="h-5 w-48" />
+// // // // <Skeleton className="h-4 w-64" />
+// // // // </CardHeader>
+// // // // <CardContent>
+// // // // <Skeleton className="h-[350px] w-full" />
+// // // // </CardContent>
 // // // // </Card>
-
 // // // // )
 // // // // }
 
+// // // // if (!data || data.length === 0) {
+// // // // return (
+// // // // <Card>
+// // // // <CardHeader>
+// // // // <CardTitle>Model vs Competitor Performance</CardTitle>
+// // // // <CardDescription>
+// // // // Daily traffic comparison across competing models
+// // // // </CardDescription>
+// // // // </CardHeader>
 
+// // // // <CardContent>
+// // // // <div className="flex h-[350px] items-center justify-center text-muted-foreground">
+// // // // No trend data available
+// // // // </div>
+// // // // </CardContent>
+// // // // </Card>
+// // // // )
+// // // // }
 
+// // // // /* ----------------------------- */
+// // // // /* FIX: COLLAPSE VARIANT MODELS */
+// // // // /* ----------------------------- */
 
-// // // 'use client'
+// // // // const rawModels = Object.keys(data[0]).filter((k) => k !== 'date')
 
-// // // import {
-// // // LineChart,
-// // // Line,
-// // // XAxis,
-// // // YAxis,
-// // // CartesianGrid,
-// // // Tooltip,
-// // // Legend,
-// // // ResponsiveContainer,
-// // // } from 'recharts'
+// // // // const models = Array.from(
+// // // // new Set(
+// // // // rawModels.map((m) =>
+// // // // m
+// // // // .replace(/_ev$/i,'')
+// // // // .replace(/_roxx$/i,'')
+// // // // .replace(/_racer$/i,'')
+// // // // .replace(/_e$/i,'')
+// // // // )
+// // // // )
+// // // // )
 
-// // // import {
-// // // Card,
-// // // CardContent,
-// // // CardHeader,
-// // // CardTitle,
-// // // CardDescription,
-// // // } from '@/components/ui/card'
+// // // // /* ----------------------------- */
+// // // // /* PPT EXPORT REGISTRATION */
+// // // // /* ----------------------------- */
 
-// // // import { Skeleton } from '@/components/ui/skeleton'
+// // // // useEffect(() => {
 
-// // // const CHART_COLORS = [
-// // // '#2563eb',
-// // // '#dc2626',
-// // // '#16a34a',
-// // // '#d97706',
-// // // '#7c3aed',
-// // // '#0891b2',
-// // // '#db2777',
-// // // ]
+// // // // if (!data) return
 
-// // // function formatLabel(key: string): string {
-// // // return key
-// // // .replace(/_/g, ' ')
-// // // .replace(/\b\w/g, (c) => c.toUpperCase())
-// // // }
+// // // // const step = Math.ceil(data.length / 12)
 
-// // // function formatDateTick(val: string): string {
-// // // const d = new Date(val + 'T00:00:00')
-// // // return d.toLocaleDateString('en-US', {
-// // // month: 'short',
-// // // day: 'numeric',
-// // // })
-// // // }
+// // // // const reduced = data.filter((_, i) => i % step === 0)
 
-// // // function formatDateTooltip(val: string): string {
-// // // const d = new Date(val + 'T00:00:00')
-// // // return d.toLocaleDateString('en-US', {
-// // // weekday: 'short',
-// // // month: 'short',
-// // // day: 'numeric',
-// // // })
-// // // }
+// // // // const labels = reduced.map((d) => String(d.date))
 
-// // // interface TrendChartProps {
-// // // data: Record<string, string | number>[] | undefined
-// // // isLoading: boolean
-// // // }
+// // // // const series = models.map((model) => ({
+// // // // name: model,
+// // // // values: reduced.map((d) => Number(d[model] || 0))
+// // // // }))
 
-// // // export function TrendChart({ data, isLoading }: TrendChartProps) {
+// // // // registerTrendChart({
+// // // // title: "Traffic Trend",
+// // // // labels,
+// // // // series
+// // // // })
 
-// // // if (isLoading) {
-// // // return ( <Card> <CardHeader> <Skeleton className="h-5 w-48" /> <Skeleton className="h-4 w-64" /> </CardHeader> <CardContent> <Skeleton className="h-[350px] w-full" /> </CardContent> </Card>
-// // // )
-// // // }
+// // // // }, [data])
 
-// // // if (!data || data.length === 0) {
-// // // return ( <Card> <CardHeader> <CardTitle>Model vs Competitor Performance</CardTitle> <CardDescription>
-// // // Daily traffic comparison across competing models </CardDescription> </CardHeader>
+// // // // return (
+// // // // <Card>
 
-// // // <CardContent>
-// // //   <div className="flex h-[350px] items-center justify-center text-muted-foreground">
-// // //     No trend data available
-// // //   </div>
-// // // </CardContent>
-// // // </Card> )
+// // // // <CardHeader>
+// // // // <CardTitle>Model vs Competitor Performance</CardTitle>
+// // // // <CardDescription>
+// // // // Daily traffic comparison across competing models
+// // // // </CardDescription>
+// // // // </CardHeader>
 
-// // // }
+// // // // <CardContent>
+// // // // <ResponsiveContainer width="100%" height={350}>
 
-// // // /* ----------------------------- /
-// // // / FIX: COLLAPSE VARIANT MODELS /
-// // // / ----------------------------- */
+// // // // <LineChart
+// // // // data={data}
+// // // // margin={{ top: 10, right: 25, left: 10, bottom: 10 }}
+// // // // >
 
-// // // const rawModels = Object.keys(data[0]).filter((k) => k !== 'date')
+// // // // <CartesianGrid
+// // // // strokeDasharray="2 4"
+// // // // vertical={false}
+// // // // opacity={0.3}
+// // // // />
 
-// // // const models = Array.from(
-// // // new Set(
-// // // rawModels.map((m) =>
-// // // m
-// // // .replace(/_ev$/i,'')
-// // // .replace(/_roxx$/i,'')
-// // // .replace(/_racer$/i,'')
-// // // .replace(/_e$/i,'')
-// // // )
-// // // )
-// // // )
+// // // // <XAxis
+// // // // dataKey="date"
+// // // // tick={{ fontSize: 12 }}
+// // // // tickFormatter={formatDateTick}
+// // // // tickLine={false}
+// // // // />
 
-// // // return ( <Card>
+// // // // <YAxis
+// // // // tick={{ fontSize: 12 }}
+// // // // width={60}
+// // // // tickFormatter={(v) => Number(v).toLocaleString()}
+// // // // tickLine={false}
+// // // // axisLine={false}
+// // // // />
 
-// // // <CardHeader> <CardTitle>Model vs Competitor Performance</CardTitle> <CardDescription> Daily traffic comparison across competing models </CardDescription> </CardHeader> <CardContent> <ResponsiveContainer width="100%" height={350}>
-// // //   <LineChart
-// // //     data={data}
-// // //     margin={{ top: 10, right: 25, left: 10, bottom: 10 }}
-// // //   >
+// // // // <Tooltip
+// // // // formatter={(value, name) => [
+// // // // Number(value).toLocaleString(),
+// // // // formatLabel(String(name)),
+// // // // ]}
+// // // // labelFormatter={formatDateTooltip}
+// // // // contentStyle={{
+// // // // borderRadius: 8,
+// // // // border: '1px solid #e5e7eb',
+// // // // }}
+// // // // />
 
-// // //     {/* cleaner grid */}
-// // //     <CartesianGrid
-// // // //       strokeDasharray="2 4"
-// // // //       vertical={false}
-// // // //       opacity={0.3}
-// // // //     />
+// // // // <Legend
+// // // // formatter={(value) => formatLabel(String(value))}
+// // // // />
 
-// // // //     <XAxis
-// // // //       dataKey="date"
-// // // //       tick={{ fontSize: 12 }}
-// // // //       tickFormatter={formatDateTick}
-// // // //       tickLine={false}
-// // // //     />
+// // // // {models.map((model, i) => (
+// // // // <Line
+// // // // key={model}
+// // // // type="monotone"
+// // // // dataKey={model}
+// // // // name={model}
+// // // // stroke={CHART_COLORS[i % CHART_COLORS.length]}
+// // // // strokeWidth={3}
+// // // // dot={false}
+// // // // activeDot={{ r: 5 }}
+// // // // connectNulls
+// // // // isAnimationActive={false}
+// // // // />
+// // // // ))}
 
-// // // //     <YAxis
-// // // //       tick={{ fontSize: 12 }}
-// // // //       width={60}
-// // // //       tickFormatter={(v) => Number(v).toLocaleString()}
-// // // //       tickLine={false}
-// // // //       axisLine={false}
-// // // //     />
-
-// // // //     <Tooltip
-// // // //       formatter={(value, name) => [
-// // // //         Number(value).toLocaleString(),
-// // // //         formatLabel(String(name)),
-// // // //       ]}
-// // // //       labelFormatter={formatDateTooltip}
-// // // //       contentStyle={{
-// // // //         borderRadius: 8,
-// // // //         border: '1px solid #e5e7eb',
-// // // //       }}
-// // // //     />
-
-// // // //     <Legend
-// // // //       formatter={(value) => formatLabel(String(value))}
-// // // //     />
-
-// // // //     {models.map((model, i) => (
-// // // //       <Line
-// // // //         key={model}
-// // // //         type="monotone"
-// // // //         dataKey={model}
-// // // //         name={model}
-// // // //         stroke={CHART_COLORS[i % CHART_COLORS.length]}
-// // // //         strokeWidth={3}
-
-// // // //         /* IMPORTANT FIXES */
-
-// // // //         dot={false}
-// // // //         activeDot={{ r: 5 }}
-// // // //         connectNulls
-// // // //         isAnimationActive={false}
-// // // //       />
-// // // //     ))}
-
-// // // //   </LineChart>
+// // // // </LineChart>
 
 // // // // </ResponsiveContainer>
-// // // // </CardContent> </Card>
+// // // // </CardContent>
 
+// // // // </Card>
 // // // // )
 // // // // }
-
-
-
-
-
-
 
 
 
@@ -416,7 +643,6 @@
 // // // }
 
 // // // export function TrendChart({ data, isLoading }: TrendChartProps) {
-    
 
 // // // if (isLoading) {
 // // // return (
@@ -452,22 +678,10 @@
 // // // }
 
 // // // /* ----------------------------- */
-// // // /* FIX: COLLAPSE VARIANT MODELS */
+// // // /* GET MODELS FROM DATA KEYS */
 // // // /* ----------------------------- */
 
-// // // const rawModels = Object.keys(data[0]).filter((k) => k !== 'date')
-
-// // // const models = Array.from(
-// // // new Set(
-// // // rawModels.map((m) =>
-// // // m
-// // // .replace(/_ev$/i,'')
-// // // .replace(/_roxx$/i,'')
-// // // .replace(/_racer$/i,'')
-// // // .replace(/_e$/i,'')
-// // // )
-// // // )
-// // // )
+// // // const models = Object.keys(data[0]).filter((k) => k !== 'date')
 
 // // // /* ----------------------------- */
 // // // /* PPT EXPORT REGISTRATION */
@@ -575,8 +789,6 @@
 // // // )
 // // // }
 
-
-
 // // 'use client'
 
 // // import { useEffect } from 'react'
@@ -678,10 +890,10 @@
 // // }
 
 // // /* ----------------------------- */
-// // /* GET MODELS FROM DATA KEYS */
+// // /* GET MODEL KEYS FROM API DATA */
 // // /* ----------------------------- */
 
-// // const models = Object.keys(data[0]).filter((k) => k !== 'date')
+// // const models = Object.keys(data[0]).filter(k => k !== 'date')
 
 // // /* ----------------------------- */
 // // /* PPT EXPORT REGISTRATION */
@@ -695,11 +907,11 @@
 
 // // const reduced = data.filter((_, i) => i % step === 0)
 
-// // const labels = reduced.map((d) => String(d.date))
+// // const labels = reduced.map(d => String(d.date))
 
-// // const series = models.map((model) => ({
+// // const series = models.map(model => ({
 // // name: model,
-// // values: reduced.map((d) => Number(d[model] || 0))
+// // values: reduced.map(d => Number(d[model] || 0))
 // // }))
 
 // // registerTrendChart({
@@ -788,6 +1000,16 @@
 // // </Card>
 // // )
 // // }
+
+
+
+
+
+
+
+
+
+
 
 // 'use client'
 
@@ -893,7 +1115,13 @@
 // /* GET MODEL KEYS FROM API DATA */
 // /* ----------------------------- */
 
-// const models = Object.keys(data[0]).filter(k => k !== 'date')
+// const models = Array.from(
+// new Set(
+// data.flatMap(row =>
+// Object.keys(row).filter(k => k !== 'date')
+// )
+// )
+// )
 
 // /* ----------------------------- */
 // /* PPT EXPORT REGISTRATION */
@@ -1013,25 +1241,25 @@
 
 'use client'
 
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 
 import {
-LineChart,
-Line,
-XAxis,
-YAxis,
-CartesianGrid,
-Tooltip,
-Legend,
-ResponsiveContainer,
+  LineChart,
+  Line,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
+  ResponsiveContainer,
 } from 'recharts'
 
 import {
-Card,
-CardContent,
-CardHeader,
-CardTitle,
-CardDescription,
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
 } from '@/components/ui/card'
 
 import { Skeleton } from '@/components/ui/skeleton'
@@ -1078,6 +1306,57 @@ isLoading: boolean
 
 export function TrendChart({ data, isLoading }: TrendChartProps) {
 
+const registered = useRef(false)
+
+/* ----------------------------- */
+/* GET MODEL KEYS */
+/* ----------------------------- */
+
+const models =
+data
+? Array.from(
+new Set(
+data.flatMap(row =>
+Object.keys(row).filter(k => k !== 'date')
+)
+)
+)
+: []
+
+/* ----------------------------- */
+/* PPT EXPORT REGISTRATION */
+/* ----------------------------- */
+
+useEffect(() => {
+
+if (!data || !models.length) return
+if (registered.current) return
+
+registered.current = true
+
+const step = Math.ceil(data.length / 12)
+
+const reduced = data.filter((_, i) => i % step === 0)
+
+const labels = reduced.map(d => String(d.date))
+
+const series = models.map(model => ({
+name: model,
+values: reduced.map(d => Number(d[model] || 0))
+}))
+
+registerTrendChart({
+title: "Traffic Trend",
+labels,
+series
+})
+
+}, [data, models])
+
+/* ----------------------------- */
+/* LOADING STATE */
+/* ----------------------------- */
+
 if (isLoading) {
 return (
 <Card>
@@ -1091,6 +1370,10 @@ return (
 </Card>
 )
 }
+
+/* ----------------------------- */
+/* EMPTY STATE */
+/* ----------------------------- */
 
 if (!data || data.length === 0) {
 return (
@@ -1112,43 +1395,8 @@ No trend data available
 }
 
 /* ----------------------------- */
-/* GET MODEL KEYS FROM API DATA */
+/* CHART */
 /* ----------------------------- */
-
-const models = Array.from(
-new Set(
-data.flatMap(row =>
-Object.keys(row).filter(k => k !== 'date')
-)
-)
-)
-
-/* ----------------------------- */
-/* PPT EXPORT REGISTRATION */
-/* ----------------------------- */
-
-useEffect(() => {
-
-if (!data) return
-
-const step = Math.ceil(data.length / 12)
-
-const reduced = data.filter((_, i) => i % step === 0)
-
-const labels = reduced.map(d => String(d.date))
-
-const series = models.map(model => ({
-name: model,
-values: reduced.map(d => Number(d[model] || 0))
-}))
-
-registerTrendChart({
-title: "Traffic Trend",
-labels,
-series
-})
-
-}, [data])
 
 return (
 <Card>
@@ -1228,3 +1476,7 @@ isAnimationActive={false}
 </Card>
 )
 }
+
+
+
+

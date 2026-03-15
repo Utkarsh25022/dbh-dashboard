@@ -20,11 +20,13 @@ Object.values(map.platforms.cardekho.oems).forEach((oem: any) => {
 
 Object.entries(oem.models).forEach(([parent, variants]: any) => {
 
-
 const parentKey = parent.toLowerCase()
 
 /* parent itself */
 variantToParent[parentKey] = parentKey
+
+/* ensure variants is array */
+if (!Array.isArray(variants)) return
 
 variants.forEach((variant: string) => {
 

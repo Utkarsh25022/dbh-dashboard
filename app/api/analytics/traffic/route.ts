@@ -953,7 +953,12 @@ export async function GET(req: NextRequest) {
 
   try {
 
-    const propertyId = process.env.GA_PROPERTY_ID!
+    const propertyId = process.env.GA_PROPERTY_ID
+
+    if (!propertyId) {
+    throw new Error("GA_PROPERTY_ID missing")
+  }
+    console.log("GA_PROPERTY_ID:", propertyId)
 
     const { searchParams } = new URL(req.url)
 

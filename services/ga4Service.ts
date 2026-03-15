@@ -28,15 +28,25 @@ let client: BetaAnalyticsDataClient | null = null
 
 function getClient() {
   if (!client) {
-    client = new BetaAnalyticsDataClient({
-      credentials: {
-        client_email: process.env.GA_CLIENT_EMAIL,
-        private_key: process.env.GA_PRIVATE_KEY?.replace(/\\n/g, "\n")
-      }
-    })
+
+    if (process.env.GA_KEY_FILE) {
+      client = new BetaAnalyticsDataClient({
+        keyFilename: process.env.GA_KEY_FILE
+      })
+    } else {
+      client = new BetaAnalyticsDataClient({
+        credentials: {
+          client_email: process.env.GA_CLIENT_EMAIL,
+          private_key: process.env.GA_PRIVATE_KEY?.replace(/\\n/g, "\n")
+        }
+      })
+    }
+
   }
+
   return client
 }
+
 
 /* ----------------------------- */
 /* SIMPLE CACHE */

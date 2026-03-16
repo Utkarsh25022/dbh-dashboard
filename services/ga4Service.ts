@@ -2561,7 +2561,8 @@ let client: BetaAnalyticsDataClient | null = null
 function getClient() {
   if (!client) {
     client = new BetaAnalyticsDataClient({
-      keyFilename: "/etc/secrets/ga-key.json"
+      keyFilename: process.env.GA_KEY_FILE,
+      private_key: process.env.GA_PRIVATE_KEY?.replace(/\\n/g, "\n")
     })
   }
   return client

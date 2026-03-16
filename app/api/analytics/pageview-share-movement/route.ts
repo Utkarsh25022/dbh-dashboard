@@ -8,7 +8,7 @@ export async function GET(req: NextRequest) {
 
   const models =
     searchParams.get("models")?.split(",")
-      .map(m => m.toLowerCase().replace(/\s+/g,"_").trim())
+      .map(m => m.toLowerCase().replace(/\s+/g, "_").trim())
       .filter(Boolean) || []
 
   const start = searchParams.get("start") || "180daysAgo"
@@ -20,13 +20,26 @@ export async function GET(req: NextRequest) {
     | "organic"
     | "inorganic"
 
-  const metric =
-    (searchParams.get("metric") || "traffic") as
-    | "traffic"
-    | "pv"
-    | "mofu"
+  /* ----------------------------- */
+  /* METRIC MAPPING FIX            */
+  /* ----------------------------- */
+
+  const metricParam = searchParams.get("metric") || "traffic"
+
+  const metric: "traffic" | "pageviews" | "pvs" | "mofu" =
+    metricParam === "pv"
+      ? "pageviews"
+      : metricParam === "mofu"
+      ? "mofu"
+      : metricParam === "pvs"
+      ? "pvs"
+      : "traffic"
 
   const propertyId = process.env.GA_PROPERTY_ID!
+
+  /* ----------------------------- */
+  /* FETCH HEATMAP DATA            */
+  /* ----------------------------- */
 
   const rows = await fetchHeatmap(
     propertyId,
@@ -34,23 +47,33 @@ export async function GET(req: NextRequest) {
     end,
     models,
     trafficType,
-    metric
+    metric === "mofu" ? "mofu" : undefined
   )
 
   const safeRows = rows || []
 
-  const cleanRows = safeRows.filter((row:any)=>{
+  /* ----------------------------- */
+  /* CLEAN INVALID MODELS          */
+  /* ----------------------------- */
+
+  const cleanRows = safeRows.filter((row: any) => {
 
     const model = row.dimensionValues?.[1]?.value
 
-    if(!model) return false
-    if(model === "(not set)") return false
-    if(!isNaN(Number(model))) return false
+    if (!model) return false
+    if (model === "(not set)") return false
+    if (!isNaN(Number(model))) return false
 
     return true
   })
 
-  const result = transformHeatmap(cleanRows, metric, models)
+  /* ----------------------------- */
+  /* TRANSFORM HEATMAP             */
+  /* ----------------------------- */
+  console.log("METRIC PARAM:", metricParam)
+console.log("METRIC USED:", metric)
+
+  const result = transformHeatmap(cleanRows, "pageviews")
 
   return NextResponse.json(result)
 

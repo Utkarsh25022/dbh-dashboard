@@ -249,8 +249,6 @@
 
 
 
-
-
 import { NextRequest, NextResponse } from "next/server"
 import { fetchHeatmap } from "@/services/ga4Service"
 import { transformHeatmap } from "@/lib/transformHeatmap"
@@ -285,7 +283,7 @@ export async function GET(req: NextRequest) {
     end,
     models,
     trafficType,
-    "mofu"
+    "mofu"     // ✅ THIS WAS MISSING
   )
 
   const safeRows = rows || []

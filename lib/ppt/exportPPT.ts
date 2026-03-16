@@ -725,17 +725,223 @@
 
 
 
+// import PptxGenJS from "pptxgenjs"
+
+// import {
+//   getCharts,
+//   getTrendChart,
+//   clearCharts
+// } from "@/lib/ppt/chartRegistry"
+
+// import {
+//   getHeatmaps,
+//   clearHeatmaps
+// } from "@/lib/ppt/heatmapRegistry"
+
+// export interface PPTPayload {
+//   dateRange: string
+//   models: string[]
+// }
+
+// export async function generatePPT(payload: PPTPayload) {
+
+//   const pptx = new PptxGenJS()
+//   pptx.layout = "LAYOUT_16x9"
+
+//   const COLORS = [
+//     "2563EB",
+//     "14B8A6",
+//     "7C3AED",
+//     "F59E0B",
+//     "64748B"
+//   ]
+
+//   const charts = getCharts()
+//   const trendChart = getTrendChart()
+//   const heatmaps = getHeatmaps()
+
+//   /* ----------------------------- */
+//   /* TITLE SLIDE (ONLY SLIDE WITH LOGO) */
+//   /* ----------------------------- */
+// /* ----------------------------- */
+// /* TITLE SLIDE (CARDEKHO TEMPLATE) */
+// /* ----------------------------- *
+
+// /* FULL COVER IMAGE (EXPORTED FROM PPT TEMPLATE) */
+
+// /* ----------------------------- */
+// /* TITLE SLIDE (CARDEKHO TEMPLATE) */
+// /* ----------------------------- */
+
+// const cover = pptx.addSlide()
+
+// /* BACKGROUND TEMPLATE */
+
+// cover.addImage({
+//   path: "/Slide1.PNG",
+//   x: 0,
+//   y: 0,
+//   w: 10,
+//   h: 5.625
+// })
+
+// /* DYNAMIC TEXT */
+
+// cover.addText(payload.models.join(", "), {
+//   x: 2,
+//   y: 3,
+//   fontSize: 28,
+//   bold: true,
+//   color: "000000"
+// })
+
+// cover.addText(payload.dateRange, {
+//   x: 2,
+//   y: 3.8,
+//   fontSize: 22,
+//   color: "000000"
+// })
+
+//   /* ----------------------------- */
+//   /* TREND CHART */
+//   /* ----------------------------- */
+
+//   if (trendChart) {
+
+//     const slide = pptx.addSlide()
+
+//     slide.addText(trendChart.title, {
+//       x: 0.7,
+//       y: 0.8,
+//       fontSize: 24,
+//       bold: true
+//     })
+
+//     slide.addChart(
+//       pptx.ChartType.line,
+//       trendChart.series.map((s) => ({
+//         name: s.name,
+//         labels: trendChart.labels,
+//         values: s.values
+//       })),
+//       {
+//         x: 0.8,
+//         y: 1.6,
+//         w: 7.8,
+//         h: 3.5,
+//         showLegend: true,
+//         lineSize: 2,
+//         markerSize: 5,
+//         chartColors: COLORS,
+//         valAxisTitle: "Users",
+//         catAxisTitle: "Date"
+//       }
+//     )
+
+//   }
+
+//   /* ----------------------------- */
+//   /* OTHER CHARTS */
+//   /* ----------------------------- */
+
+//   charts.forEach((chart) => {
+
+//     const slide = pptx.addSlide()
+
+//     slide.addText(chart.title, {
+//       x: 0.7,
+//       y: 0.8,
+//       fontSize: 24,
+//       bold: true
+//     })
+
+//     slide.addChart(
+//       pptx.ChartType.bar,
+//       [{
+//         name: chart.title,
+//         labels: chart.labels,
+//         values: chart.values
+//       }],
+//       {
+//         x: 0.8,
+//         y: 1.6,
+//         w: 7.8,
+//         h: 3.5,
+//         showLegend: true,
+//         chartColors: COLORS
+//       }
+//     )
+
+//   })
+
+//   /* ----------------------------- */
+//   /* HEATMAPS */
+//   /* ----------------------------- */
+
+//   heatmaps.forEach((heatmap) => {
+
+//     const slide = pptx.addSlide()
+
+//     slide.addText(heatmap.title, {
+//       x: 0.7,
+//       y: 0.8,
+//       fontSize: 24,
+//       bold: true
+//     })
+
+//     const tableData = [
+//       ["", ...heatmap.columns],
+//       ...heatmap.rows.map((row, i) => [
+//         row,
+//         ...heatmap.values[i].map(v => v.toString())
+//       ])
+//     ]
+
+//     slide.addTable(tableData, {
+//       x: 0.6,
+//       y: 1.5,
+//       w: 8.5,
+//       fontSize: 12,
+//       border: { pt: 1, color: "CCCCCC" }
+//     })
+
+//   })
+
+//   /* ----------------------------- */
+//   /* EXPORT FILE */
+//   /* ----------------------------- */
+
+//   await pptx.writeFile({
+//     fileName: "CarDekho_DBH_Report.pptx"
+//   })
+
+//   /* ----------------------------- */
+//   /* CLEAR REGISTRY AFTER EXPORT */
+//   /* ----------------------------- */
+
+//   clearCharts()
+//   clearHeatmaps()
+// }
+
+
+
+
+
+
+
+
+
+
+
 import PptxGenJS from "pptxgenjs"
 
 import {
   getCharts,
-  getTrendChart,
-  clearCharts
+  getTrendChart
 } from "@/lib/ppt/chartRegistry"
 
 import {
-  getHeatmaps,
-  clearHeatmaps
+  getHeatmaps
 } from "@/lib/ppt/heatmapRegistry"
 
 export interface PPTPayload {
@@ -761,46 +967,33 @@ export async function generatePPT(payload: PPTPayload) {
   const heatmaps = getHeatmaps()
 
   /* ----------------------------- */
-  /* TITLE SLIDE (ONLY SLIDE WITH LOGO) */
+  /* TITLE SLIDE */
   /* ----------------------------- */
-/* ----------------------------- */
-/* TITLE SLIDE (CARDEKHO TEMPLATE) */
-/* ----------------------------- *
 
-/* FULL COVER IMAGE (EXPORTED FROM PPT TEMPLATE) */
+  const cover = pptx.addSlide()
 
-/* ----------------------------- */
-/* TITLE SLIDE (CARDEKHO TEMPLATE) */
-/* ----------------------------- */
+  cover.addImage({
+    path: "/Slide1.PNG",
+    x: 0,
+    y: 0,
+    w: 10,
+    h: 5.625
+  })
 
-const cover = pptx.addSlide()
+  cover.addText(payload.models.join(", "), {
+    x: 2,
+    y: 3,
+    fontSize: 28,
+    bold: true,
+    color: "000000"
+  })
 
-/* BACKGROUND TEMPLATE */
-
-cover.addImage({
-  path: "/Slide1.PNG",
-  x: 0,
-  y: 0,
-  w: 10,
-  h: 5.625
-})
-
-/* DYNAMIC TEXT */
-
-cover.addText(payload.models.join(", "), {
-  x: 2,
-  y: 3,
-  fontSize: 28,
-  bold: true,
-  color: "000000"
-})
-
-cover.addText(payload.dateRange, {
-  x: 2,
-  y: 3.8,
-  fontSize: 22,
-  color: "000000"
-})
+  cover.addText(payload.dateRange, {
+    x: 2,
+    y: 3.8,
+    fontSize: 22,
+    color: "000000"
+  })
 
   /* ----------------------------- */
   /* TREND CHART */
@@ -915,10 +1108,4 @@ cover.addText(payload.dateRange, {
     fileName: "CarDekho_DBH_Report.pptx"
   })
 
-  /* ----------------------------- */
-  /* CLEAR REGISTRY AFTER EXPORT */
-  /* ----------------------------- */
-
-  clearCharts()
-  clearHeatmaps()
 }

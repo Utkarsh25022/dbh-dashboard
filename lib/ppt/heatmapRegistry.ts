@@ -3,6 +3,7 @@ type HeatmapData = {
   rows: string[]
   columns: string[]
   values: number[][]
+  createdAt: number
 }
 
 let heatmaps: HeatmapData[] = []
@@ -11,17 +12,29 @@ let heatmaps: HeatmapData[] = []
 /* REGISTER HEATMAP */
 /* ----------------------------- */
 
-export function registerHeatmap(heatmap: HeatmapData) {
+export function registerHeatmap(
+  heatmap: Omit<HeatmapData, "createdAt">
+) {
 
-  const exists =
-    heatmaps.some(h => h.title === heatmap.title)
+  const newHeatmap: HeatmapData = {
+    ...heatmap,
+    createdAt: Date.now()
+  }
 
-  if (exists) return
+  // remove existing heatmap with same title
+  heatmaps = heatmaps.filter(h => h.title !== heatmap.title)
 
-  heatmaps.push(heatmap)
+  // add new one
+  heatmaps.push(newHeatmap)
+
+  // keep only latest 4
+  heatmaps = heatmaps
+    .sort((a, b) => b.createdAt - a.createdAt)
+    .slice(0, 4)
+
+  console.log("HEATMAPS:", heatmaps)
 
 }
-console.log("HEATMAPS:", heatmaps)
 
 /* ----------------------------- */
 /* GET HEATMAPS */

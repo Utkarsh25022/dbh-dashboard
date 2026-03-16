@@ -1110,16 +1110,16 @@ export function transformHeatmap(
     values: months.map(month => {
 
       const users     = map[model]?.[month]?.users    || 0
-      const pageviews = map[model]?.[month]?.pageviews || 0
+      const pv = map[model]?.[month]?.pageviews || 0
 
       const totalUsers     = grandTotals[month].users    || 1
       const totalPageviews = grandTotals[month].pageviews || 1
 
-      if (type === "traffic")
-        return Number(((users / totalUsers) * 100).toFixed(1))
+ if (type === "traffic")
+  return users
 
-      if (type === "pageviews")
-        return Number(((pageviews / totalPageviews) * 100).toFixed(1))
+if (type === "pageviews")
+  return pv
 
       if (type === "pvs") {
         // ✅ FIX: PV/UU is absolute per model — never divide by grand total
@@ -1130,7 +1130,7 @@ export function transformHeatmap(
       }
 
       if (type === "mofu")
-        return Number(((users / totalUsers) * 100).toFixed(1))
+        return users
 
       return 0
 

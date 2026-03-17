@@ -32,7 +32,7 @@ export function registerHeatmap(
     .sort((a, b) => b.createdAt - a.createdAt)
     .slice(0, 4)
 
-  console.log("HEATMAPS:", heatmaps)
+ 
 
 }
 

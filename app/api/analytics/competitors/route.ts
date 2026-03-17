@@ -52,10 +52,6 @@ export async function GET(req: Request) {
     reverseMap.set(key, r.rank)
   })
 
-  console.log(
-    "Reverse map sample:",
-    Array.from(reverseMap.entries()).slice(0, 5)
-  )
 
   /* ----------------------------- */
   /* FILTER EROSION DATA           */
@@ -100,17 +96,7 @@ if (erosionRows.length === 0) {
   /* DEBUG                         */
   /* ----------------------------- */
 
-  console.log("Focus model:", focusNormalized)
 
-  console.log(
-    "Erosion rows sample:",
-    erosionRows.slice(0, 5)
-  )
-
-  console.log(
-    "Final result sample:",
-    result.slice(0, 5)
-  )
 
   /* ----------------------------- */
   /* RESPONSE                      */

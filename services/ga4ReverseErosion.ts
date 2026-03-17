@@ -217,7 +217,7 @@ export async function fetchReverseErosion(
     const focusUsers =
       Number(focusReport?.rows?.[0]?.metricValues?.[0]?.value || 0)
 
-    console.log("FOCUS USERS:", focusUsers)
+
 
     if (!focusUsers) {
       console.log("No focus users found")
@@ -360,7 +360,7 @@ export async function fetchReverseErosion(
 
     })
 
-    console.log("COMPETITOR MAP:", competitorMap)
+    
 
     /* ------------------------------- */
     /* STEP 4 — CALCULATE EROSION      */
@@ -377,7 +377,7 @@ export async function fetchReverseErosion(
 
     })
 
-    console.log("EROSION RESULT:", result)
+    
 
     return result
 

@@ -34,7 +34,7 @@ export async function GET(req: Request) {
       focus,
       competitors
     )
-    console.log("EROSION RESULT:", data)
+    
 
     return NextResponse.json({
       success: true,

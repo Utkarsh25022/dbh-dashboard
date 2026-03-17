@@ -13,7 +13,7 @@ export function loadTrafficErosion() {
 
     erosionData = JSON.parse(raw)
 
-    console.log("Traffic erosion dataset loaded:", erosionData.length)
+   
   }
 
   return erosionData

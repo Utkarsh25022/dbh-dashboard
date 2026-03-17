@@ -44,21 +44,26 @@ function getBaseURL() {
 /* ------------------------------------------------ */
 /* DATE HELPER */
 /* ------------------------------------------------ */
-
+function formatLocalDate(date: Date) {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, "0")
+  const d = String(date.getDate()).padStart(2, "0")
+  return `${y}-${m}-${d}`
+}
 function buildDateParams(dateRange?: DateRange) {
 
   const today = new Date()
-  const todayStr = today.toISOString().split("T")[0]
+  const todayStr = formatLocalDate(today)
 
   if (!dateRange?.from) {
     return { start: "7daysAgo", end: "today" }
   }
 
-  const start = dateRange.from.toISOString().split("T")[0]
+  const start = formatLocalDate(dateRange.from)
 
   let end = dateRange.to
-    ? dateRange.to.toISOString().split("T")[0]
-    : start
+  ? formatLocalDate(dateRange.to)
+  : start
 
   if (new Date(end) > today) end = todayStr
 
@@ -467,7 +472,7 @@ export function useGeographicData(
 function buildHeatmapDateParams(dateRange?: DateRange) {
 
   const today = new Date()
-  const todayStr = today.toISOString().split("T")[0]
+  const todayStr = formatLocalDate(today)
 
   if (!dateRange?.from) {
     return { start: "6monthsAgo", end: "today" }
@@ -475,11 +480,20 @@ function buildHeatmapDateParams(dateRange?: DateRange) {
 
   const fromDate = new Date(dateRange.from)
   fromDate.setDate(1)
-  const start = fromDate.toISOString().split("T")[0]
 
-  let toDate = dateRange.to ? new Date(dateRange.to) : new Date(dateRange.from)
-  toDate = new Date(toDate.getFullYear(), toDate.getMonth() + 1, 0)
-  let end = toDate.toISOString().split("T")[0]
+  const start = formatLocalDate(fromDate)
+
+  let toDate = dateRange.to
+    ? new Date(dateRange.to)
+    : new Date(dateRange.from)
+
+  toDate = new Date(
+    toDate.getFullYear(),
+    toDate.getMonth() + 1,
+    0
+  )
+
+  let end = formatLocalDate(toDate)
 
   if (new Date(end) > today) end = todayStr
 

@@ -72,6 +72,12 @@ function setCache(key: string, value: any) {
 /* ----------------------------- */
 
 const GA4_RELATIVE_DATE = /^(\d+daysAgo|today|yesterday)$/i
+function formatLocalDate(date: Date) {
+  const y = date.getFullYear()
+  const m = String(date.getMonth() + 1).padStart(2, "0")
+  const d = String(date.getDate()).padStart(2, "0")
+  return `${y}-${m}-${d}`
+}
 
 function clampDateRange(startDate: string, endDate: string) {
 
@@ -93,9 +99,9 @@ function clampDateRange(startDate: string, endDate: string) {
   }
 
   return {
-    startDate: start.toISOString().split("T")[0],
-    endDate: end.toISOString().split("T")[0]
-  }
+  startDate: formatLocalDate(start),
+  endDate: formatLocalDate(end)
+}
 }
 
 function clampHeatmapDateRange(startDate: string, endDate: string) {
@@ -115,9 +121,9 @@ function clampHeatmapDateRange(startDate: string, endDate: string) {
     newStart.setMonth(newStart.getMonth() - 12)
 
     return {
-      startDate: newStart.toISOString().split("T")[0],
-      endDate: end.toISOString().split("T")[0]
-    }
+  startDate: formatLocalDate(newStart),
+  endDate: formatLocalDate(end)
+}
   }
 
   return { startDate, endDate }
@@ -250,7 +256,7 @@ export async function fetchTraffic(
       }
     },
 
-    limit: 50000
+    limit: 10000
   }
 
   const [response]: any = await runGA4Report(request)
@@ -301,7 +307,7 @@ export async function fetchPageBehaviour(
       }
     },
 
-    limit: 50000
+    limit: 10000
   }
 
   const [response]: any = await runGA4Report(request)
@@ -425,56 +431,23 @@ export async function fetchHeatmap(
       }
     },
 
-    limit: 50000
+    limit: 10000
   }
 
-  const [response]: any = await runGA4Report(request)
+ const [response]: any = await runGA4Report(request)
 
-  const rows = response?.rows || []
+const rows = response?.rows || []
 
-  const targetMonth =
-    range.endDate.replace("-", "").slice(0,6)
+const filteredResult = rows.filter(r => {
 
-  const map = new Map()
+  const model = r.dimensionValues?.[1]?.value
 
-  for (const r of rows) {
+  return model &&
+    model !== "(not set)" &&
+    model !== "unknown"
+})
 
-    const model = r.dimensionValues?.[1]?.value
-
-    const users = Number(r.metricValues?.[0]?.value || 0)
-    const pageViews = Number(r.metricValues?.[1]?.value || 0)
-
-    if (!map.has(model)) {
-      map.set(model, {
-        dimensionValues: [
-          { value: targetMonth },
-          { value: model }
-        ],
-        metricValues: [
-          { value: "0" },
-          { value: "0" }
-        ]
-      })
-    }
-
-    const row = map.get(model)
-
-    row.metricValues[0].value =
-      String(Number(row.metricValues[0].value) + users)
-
-    row.metricValues[1].value =
-      String(Number(row.metricValues[1].value) + pageViews)
-  }
-
-  const result = Array.from(map.values())
-
-  // keep them in totals but remove from final display
-  const filteredResult = result.filter(r => {
-    const model = r.dimensionValues?.[1]?.value
-    return model && model !== "(not set)" && model !== "unknown"
-  })
-
-  return filteredResult
+return filteredResult
 }
 
 
@@ -530,7 +503,7 @@ export async function fetchAudience(
       }
     },
 
-    limit: 5000
+    limit: 10000
   }
 
   const [response]: any = await runGA4Report(request)
